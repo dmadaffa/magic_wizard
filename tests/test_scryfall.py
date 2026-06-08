@@ -1,7 +1,7 @@
-from unittest.mock import patch, Mock
+from unittest.mock import patch, Mock, call
 import pytest
 import requests
-from lib.scryfall import fetch_card, CardNotFoundError
+from lib.scryfall import fetch_card, CardNotFoundError, _MAX_RETRIES
 
 _BOLT_JSON = {
     "name": "Cinder Dart",
@@ -98,3 +98,51 @@ def test_double_faced_card_uses_front_face_oracle_text():
     with patch("lib.scryfall.requests.get", return_value=_ok(_DFC_JSON)):
         result = fetch_card("Tidewatch Apprentice")
     assert result["oracle_text"] == "At the beginning..."
+
+
+def _rate_limited():
+    m = Mock()
+    m.status_code = 429
+    return m
+
+
+def test_retries_on_429_then_succeeds():
+    responses = [_rate_limited(), _ok(_BOLT_JSON)]
+    with patch("lib.scryfall.requests.get", side_effect=responses) as mock_get, \
+         patch("lib.scryfall.time.sleep"):
+        result = fetch_card("Cinder Dart")
+    assert result["name"] == "Cinder Dart"
+    assert mock_get.call_count == 2
+
+
+def test_retries_exhaust_max_retries_then_raises():
+    # All attempts return 429 — the final call also 429, raise_for_status blows up
+    rate_limited_responses = [_rate_limited()] * (_MAX_RETRIES + 1)
+    last = _rate_limited()
+    last.raise_for_status.side_effect = requests.HTTPError("429")
+    responses = rate_limited_responses[:-1] + [last]
+    with patch("lib.scryfall.requests.get", side_effect=responses), \
+         patch("lib.scryfall.time.sleep"):
+        with pytest.raises(requests.HTTPError):
+            fetch_card("Cinder Dart")
+
+
+def test_sleeps_between_every_request():
+    with patch("lib.scryfall.requests.get", return_value=_ok(_BOLT_JSON)) as mock_get, \
+         patch("lib.scryfall.time.sleep") as mock_sleep:
+        fetch_card("Cinder Dart")
+    # At minimum one rate-limit sleep must occur before the successful request
+    assert mock_sleep.call_count >= 1
+    assert mock_get.call_count == 1
+
+
+def test_backoff_increases_with_each_retry():
+    responses = [_rate_limited(), _rate_limited(), _ok(_BOLT_JSON)]
+    with patch("lib.scryfall.requests.get", side_effect=responses), \
+         patch("lib.scryfall.time.sleep") as mock_sleep:
+        fetch_card("Cinder Dart")
+    sleep_args = [c.args[0] for c in mock_sleep.call_args_list]
+    # Extract the backoff waits (values >= 1.0 — rate-limit sleeps are 0.55)
+    backoff_waits = [s for s in sleep_args if s >= 1.0]
+    assert len(backoff_waits) == 2
+    assert backoff_waits[1] > backoff_waits[0]

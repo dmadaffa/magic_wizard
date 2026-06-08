@@ -4,7 +4,8 @@ import time
 import requests
 
 BASE_URL = "https://api.scryfall.com"
-_RATE_LIMIT_SLEEP = 0.05  # 50ms between requests per Scryfall guidelines
+# /cards/named is capped at 2/second; 550ms gives headroom without being wasteful
+_RATE_LIMIT_SLEEP = 0.55
 _HEADERS = {"User-Agent": "magic-wizard-deck-assistant/0.1 (personal project)"}
 
 FIELDS = (
@@ -14,15 +15,32 @@ FIELDS = (
 )
 LEGALITY_FORMATS = ("standard", "modern", "pioneer", "legacy", "commander")
 
+_MAX_RETRIES = 5
+_BACKOFF_BASE = 2.0  # seconds; doubles each retry: 2, 4, 8, 16, 32
+
 
 class CardNotFoundError(Exception):
     pass
 
 
+def _get_with_backoff(url: str, **kwargs) -> requests.Response:
+    """GET with exponential backoff on 429 responses."""
+    for attempt in range(_MAX_RETRIES):
+        time.sleep(_RATE_LIMIT_SLEEP)
+        resp = requests.get(url, **kwargs)
+        if resp.status_code != 429:
+            return resp
+        wait = _BACKOFF_BASE ** attempt
+        print(f"[scryfall] 429 rate-limited — retrying in {wait:.0f}s (attempt {attempt + 1}/{_MAX_RETRIES})")
+        time.sleep(wait)
+    # Final attempt after max retries
+    time.sleep(_RATE_LIMIT_SLEEP)
+    return requests.get(url, **kwargs)
+
+
 def fetch_card(name: str) -> dict:
     """Fetch a single card by exact name. Raises CardNotFoundError if not found."""
-    time.sleep(_RATE_LIMIT_SLEEP)
-    resp = requests.get(
+    resp = _get_with_backoff(
         f"{BASE_URL}/cards/named",
         params={"exact": name},
         headers=_HEADERS,
