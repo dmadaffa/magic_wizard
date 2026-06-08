@@ -18,12 +18,13 @@ from lib.cache import CardCache
 from lib.scryfall import CardNotFoundError, fetch_card
 
 
-def main(names: list[str]) -> int:
+def main(names: list[str], cache: CardCache | None = None) -> int:
     if not names:
         print("Usage: card_fetcher.py <card_name> [<card_name> ...]")
         return 1
 
-    cache = CardCache()
+    if cache is None:
+        cache = CardCache()
     results = cache.get_many(names)
 
     hits = [n for n, v in results.items() if v is not None]
