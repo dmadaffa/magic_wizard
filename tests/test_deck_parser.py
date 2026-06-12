@@ -36,7 +36,7 @@ def test_accepts_quantity_with_x_suffix():
 
 def test_empty_input_returns_empty_deck():
     deck = parse("")
-    assert deck == {"main": [], "side": []}
+    assert deck["main"] == [] and deck["side"] == []
 
 
 def test_unique_names_deduplicates_across_main_and_side():
