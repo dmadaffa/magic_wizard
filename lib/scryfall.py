@@ -1,4 +1,4 @@
-"""Thin Scryfall API client — returns only the fields we need."""
+"""Thin Scryfall API client — returns card objects trimmed of images, prices and links."""
 
 import time
 import requests
@@ -8,12 +8,23 @@ BASE_URL = "https://api.scryfall.com"
 _RATE_LIMIT_SLEEP = 0.55
 _HEADERS = {"User-Agent": "magic-wizard-deck-assistant/0.1 (personal project)"}
 
-FIELDS = (
-    "name", "mana_cost", "cmc", "type_line",
-    "colors", "color_identity", "oracle_text",
-    "power", "toughness", "loyalty",
-)
+# Legality columns shown by the analysis; the full legalities dict is still stored.
 LEGALITY_FORMATS = ("standard", "modern", "pioneer", "legacy", "commander")
+
+# Keys dropped before caching: images, prices, links and print trivia. Everything
+# else is kept, so new Scryfall fields (and new mechanics) need no re-fetch.
+_DROP_KEYS = frozenset({
+    "image_uris", "image_status", "image_updated_at", "highres_image",
+    "prices", "purchase_uris", "related_uris", "uri", "scryfall_uri",
+    "rulings_uri", "prints_search_uri", "set_uri", "set_search_uri",
+    "scryfall_set_uri", "multiverse_ids", "mtgo_id", "mtgo_foil_id",
+    "arena_id", "tcgplayer_id", "tcgplayer_etched_id", "cardmarket_id",
+    "resource_id", "artist", "artist_id", "artist_ids", "illustration_id",
+    "card_back_id", "flavor_text", "border_color", "frame", "frame_effects",
+    "security_stamp", "full_art", "textless", "booster", "story_spotlight",
+    "promo_types", "finishes", "foil", "nonfoil", "oversized", "promo",
+    "variation", "preview",
+})
 
 _MAX_RETRIES = 5
 _BACKOFF_BASE = 2.0  # seconds; doubles each retry: 2, 4, 8, 16, 32
@@ -39,7 +50,7 @@ def _get_with_backoff(url: str, **kwargs) -> requests.Response:
 
 
 def fetch_card(name: str) -> dict:
-    """Fetch a single card by exact name. Raises CardNotFoundError if not found."""
+    """Fetch a card by exact name as a trimmed Scryfall object. Raises CardNotFoundError if not found."""
     resp = _get_with_backoff(
         f"{BASE_URL}/cards/named",
         params={"exact": name},
@@ -51,23 +62,18 @@ def fetch_card(name: str) -> dict:
         raise CardNotFoundError(f"Card not found: {name!r}")
     resp.raise_for_status()
 
-    data = resp.json()
+    return trim_card(resp.json())
 
-    # Handle double-faced cards — use front face fields where missing on root
-    face = data
-    if "card_faces" in data and "oracle_text" not in data:
-        face = data["card_faces"][0]
 
-    result = {field: face.get(field, "") for field in FIELDS}
+def _trim(obj: dict) -> dict:
+    return {k: v for k, v in obj.items() if k not in _DROP_KEYS}
 
-    # Normalize list fields to pipe-separated strings for CSV friendliness
-    for list_field in ("colors", "color_identity"):
-        val = result[list_field]
-        result[list_field] = "|".join(val) if isinstance(val, list) else (val or "")
 
-    # flatten legality booleans
-    legalities = data.get("legalities", {})
-    for fmt in LEGALITY_FORMATS:
-        result[f"legal_{fmt}"] = legalities.get(fmt, "not_legal")
-
-    return result
+def trim_card(data: dict) -> dict:
+    """Strip presentation-only keys from a Scryfall card object, keeping faces and related parts."""
+    card = _trim(data)
+    if "card_faces" in card:
+        card["card_faces"] = [_trim(face) for face in card["card_faces"]]
+    if "all_parts" in card:
+        card["all_parts"] = [_trim(part) for part in card["all_parts"]]
+    return card

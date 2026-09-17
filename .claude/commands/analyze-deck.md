@@ -6,7 +6,7 @@ The user provides a path to a deck list file, and optionally a format name.
 Examples:
 - `/analyze-deck decks/my_deck.txt`
 - `/analyze-deck decks/my_deck.txt Modern`
-- `/analyze-deck inputs/draft.txt Standard`
+- `/analyze-deck decks/draft.txt Standard`
 
 Split `$ARGUMENTS` into the **file path** (first token) and an optional **format name** (remaining tokens, e.g. "Modern", "Standard", "Commander").
 
@@ -35,12 +35,30 @@ uv run python agents/card_fetcher.py "<card1>" "<card2>" ...
 Pass ALL unique card names (main + sideboard) in a single call. The fetcher handles cache hits itself.
 
 ### Step 3 — Load card data
-Read `data/card_cache.csv`. For each card in the deck, find its row.
-Build two compact card lists using the format:
+Run the card view for all unique card names (main + sideboard) in a single call:
 ```
-4x Cinder Dart | {R} | CMC 1 | Instant | modern:legal, legacy:legal
+uv run python agents/card_view.py "<card1>" "<card2>" ...
 ```
-Include oracle text only for non-obvious cards (skip basic lands).
+Do not read `data/card_cache.jsonl` directly. The output has one block per card:
+```
+Ember Sting | {R} | CMC 1 | identity R | Instant | standard:not_legal, modern:legal, ...
+    Ember Sting deals 2 damage to any target.
+Tidewatch Apprentice // Tidewatch Horror | transform | CMC 1 | identity U | standard:not_legal, ...
+  [face 1: cast] Tidewatch Apprentice | {U} | Creature — Human Apprentice | 1/2
+    At the beginning of your upkeep, ...
+  [face 2: transform] Tidewatch Horror | Creature — Horror | 3/3
+    Flying
+```
+Multi-face cards list each face with how it is reached:
+- `cast` — can be cast from hand for that face's cost (MDFC faces, adventure and split halves)
+- `transform`, `disturb`, `daybound`, `craft`, `more_than_meets_the_eye` — reached by transforming, not cast from hand for its cost
+- `prepared` — the spell copy cast while the creature is prepared
+- `flip`, `meld` — reached by flipping / melding
+
+For the **mana curve**, count each card at its `CMC` (for split cards this is the combined cost), and note cheaper `cast` faces (e.g. an adventure half or an MDFC land face) as flexibility. Treat back faces that are not `cast` as upside of the front face, not as separate spells.
+
+Build two compact card lists prefixed with quantity (`4x ...`), keeping face lines for multi-face cards.
+Include oracle text only for non-obvious cards.
 
 **Main deck** — list all main deck cards.
 **Sideboard** — list all sideboard cards (omit this section if `side` is empty).

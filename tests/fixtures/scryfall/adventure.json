@@ -1,0 +1,172 @@
+{
+  "object": "card",
+  "id": "041f26ad-bef8-55b0-94d7-1f0cdecc346d",
+  "oracle_id": "e3983b01-be8a-5471-ae58-60234011ed0d",
+  "multiverse_ids": [],
+  "mtgo_id": 1007,
+  "tcgplayer_id": 1007,
+  "cardmarket_id": 1007,
+  "name": "Quarry Brute // Rockslide",
+  "lang": "en",
+  "released_at": "2026-01-01",
+  "uri": "https://api.example.invalid/quarry-brute----rockslide/uri",
+  "scryfall_uri": "https://api.example.invalid/quarry-brute----rockslide/scryfall_uri",
+  "layout": "adventure",
+  "highres_image": true,
+  "image_status": "highres_scan",
+  "image_updated_at": "2026-01-01T00:00:00Z",
+  "image_uris": {
+    "small": "https://img.example.invalid/quarry-brute----rockslide/small",
+    "normal": "https://img.example.invalid/quarry-brute----rockslide/normal",
+    "large": "https://img.example.invalid/quarry-brute----rockslide/large",
+    "png": "https://img.example.invalid/quarry-brute----rockslide/png",
+    "art_crop": "https://img.example.invalid/quarry-brute----rockslide/art_crop",
+    "border_crop": "https://img.example.invalid/quarry-brute----rockslide/border_crop",
+    "thumb": "https://img.example.invalid/quarry-brute----rockslide/thumb",
+    "grid": "https://img.example.invalid/quarry-brute----rockslide/grid",
+    "display": "https://img.example.invalid/quarry-brute----rockslide/display",
+    "art": "https://img.example.invalid/quarry-brute----rockslide/art",
+    "crop": "https://img.example.invalid/quarry-brute----rockslide/crop"
+  },
+  "mana_cost": "{3}{R} // {1}{R}",
+  "cmc": 4.0,
+  "type_line": "Creature — Giant // Instant — Adventure",
+  "power": "4",
+  "toughness": "4",
+  "colors": [
+    "R"
+  ],
+  "color_identity": [
+    "R"
+  ],
+  "keywords": [],
+  "card_faces": [
+    {
+      "object": "card_face",
+      "name": "Quarry Brute",
+      "mana_cost": "{3}{R}",
+      "type_line": "Creature — Giant",
+      "oracle_text": "When this creature enters, it deals 1 damage to each opponent.",
+      "power": "4",
+      "toughness": "4",
+      "flavor_text": "Placeholder flavor text.",
+      "artist": "Test Artist",
+      "artist_id": "89ad61b4-c32c-5c4b-9359-2d4ade2dd477",
+      "illustration_id": "ca49ac14-ee77-5072-87c4-5eb113446194"
+    },
+    {
+      "object": "card_face",
+      "name": "Rockslide",
+      "mana_cost": "{1}{R}",
+      "type_line": "Instant — Adventure",
+      "oracle_text": "Rockslide deals 3 damage to target creature. Then exile this card; you may cast the creature later from exile.",
+      "artist": "Test Artist",
+      "artist_id": "4763067a-08ca-5385-9761-f34db894798d"
+    }
+  ],
+  "all_parts": [
+    {
+      "object": "related_card",
+      "id": "823cc34d-3208-5305-92c6-3ac72e364bd3",
+      "component": "combo_piece",
+      "name": "Adventure Helper",
+      "type_line": "Card",
+      "uri": "https://api.example.invalid/adventure-helper"
+    },
+    {
+      "object": "related_card",
+      "id": "52a61382-8abb-5033-8015-8f561b833581",
+      "component": "combo_piece",
+      "name": "Quarry Brute // Rockslide",
+      "type_line": "Creature — Giant // Instant — Adventure",
+      "uri": "https://api.example.invalid/quarry-brute----rockslide"
+    }
+  ],
+  "legalities": {
+    "standard": "not_legal",
+    "future": "not_legal",
+    "historic": "legal",
+    "timeless": "legal",
+    "gladiator": "legal",
+    "pioneer": "legal",
+    "modern": "legal",
+    "legacy": "legal",
+    "pauper": "legal",
+    "vintage": "legal",
+    "penny": "legal",
+    "commander": "legal",
+    "oathbreaker": "legal",
+    "standardbrawl": "legal",
+    "brawl": "legal",
+    "competitivebrawl": "legal",
+    "alchemy": "not_legal",
+    "paupercommander": "legal",
+    "duel": "legal",
+    "oldschool": "not_legal",
+    "premodern": "not_legal",
+    "predh": "not_legal",
+    "tlr": "legal"
+  },
+  "games": [
+    "paper",
+    "mtgo"
+  ],
+  "reserved": false,
+  "game_changer": false,
+  "foil": false,
+  "nonfoil": true,
+  "finishes": [
+    "nonfoil"
+  ],
+  "oversized": false,
+  "promo": false,
+  "reprint": true,
+  "variation": false,
+  "set_id": "3e0d318f-9131-53d1-9ed7-feb63ce36e32",
+  "set": "tst",
+  "set_name": "Test Set",
+  "set_type": "draft_innovation",
+  "set_uri": "https://api.example.invalid/quarry-brute----rockslide/set_uri",
+  "set_search_uri": "https://api.example.invalid/quarry-brute----rockslide/set_search_uri",
+  "scryfall_set_uri": "https://api.example.invalid/quarry-brute----rockslide/scryfall_set_uri",
+  "rulings_uri": "https://api.example.invalid/quarry-brute----rockslide/rulings_uri",
+  "prints_search_uri": "https://api.example.invalid/quarry-brute----rockslide/prints_search_uri",
+  "collector_number": "7",
+  "digital": false,
+  "rarity": "rare",
+  "flavor_text": "Placeholder flavor text.",
+  "card_back_id": "c20a5aa7-ce7b-51db-a13c-8fbfb1d2359c",
+  "artist": "Test Artist",
+  "artist_ids": [
+    "8408ab9e-4fe6-5073-ab31-5b2019b741fc"
+  ],
+  "illustration_id": "534fbf08-490c-5687-9423-d89efb87817c",
+  "border_color": "black",
+  "frame": "2015",
+  "security_stamp": "oval",
+  "full_art": false,
+  "textless": false,
+  "booster": false,
+  "story_spotlight": false,
+  "edhrec_rank": 1007,
+  "penny_rank": 1007,
+  "prices": {
+    "usd": null,
+    "usd_foil": null,
+    "usd_etched": null,
+    "eur": null,
+    "eur_foil": null,
+    "tix": null
+  },
+  "related_uris": {
+    "gatherer": "https://img.example.invalid/quarry-brute----rockslide/gatherer",
+    "tcgplayer_infinite_articles": "https://img.example.invalid/quarry-brute----rockslide/tcgplayer_infinite_articles",
+    "tcgplayer_infinite_decks": "https://img.example.invalid/quarry-brute----rockslide/tcgplayer_infinite_decks",
+    "edhrec": "https://img.example.invalid/quarry-brute----rockslide/edhrec"
+  },
+  "purchase_uris": {
+    "tcgplayer": "https://img.example.invalid/quarry-brute----rockslide/tcgplayer",
+    "cardmarket": "https://img.example.invalid/quarry-brute----rockslide/cardmarket",
+    "cardhoarder": "https://img.example.invalid/quarry-brute----rockslide/cardhoarder"
+  }
+}

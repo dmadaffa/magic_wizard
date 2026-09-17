@@ -1,6 +1,8 @@
 # Magic Wizard — MTG Deck Assistant
 
-Agentic system for analyzing Magic: The Gathering decks. Uses Scryfall as the card data source and a local CSV cache to avoid redundant API calls.
+> **Open bug backlog:** see `BUGS.md` before starting new work. For each bug: write a failing test first (fixtures: Scryfall's real JSON shape, invented card content), then fix, then tick the box. Don't mark a bug done unless its test fails without the fix.
+
+Agentic system for analyzing Magic: The Gathering decks. Uses Scryfall as the card data source and a local JSON Lines cache to avoid redundant API calls.
 
 ## Quick Start
 
@@ -28,14 +30,26 @@ Supported sideboard separators: `//`, `SB:`, or a blank line between main deck a
 ## How It Works
 
 1. `lib/deck_parser.py` — parses the deck list text
-2. `agents/card_fetcher.py` — fetches missing cards from Scryfall, stores in `data/card_cache.csv`
-3. `.claude/commands/analyze-deck.md` — orchestrator skill: parse → fetch → load cache → analyze
+2. `agents/card_fetcher.py` — fetches missing cards from Scryfall, stores in `data/card_cache.jsonl`
+3. `agents/card_view.py` — prints compact per-card (and per-face) lines from the cache
+4. `.claude/commands/analyze-deck.md` — orchestrator skill: parse → fetch → view cards → analyze
 
-The card fetcher is pure Python with zero LLM cost. Claude is only called once for the analysis step.
+The card fetcher and card view are pure Python with zero LLM cost. Claude is only called once for the analysis step.
 
 ## Card Cache
 
-Card data lives in `data/card_cache.csv`. Cards are fetched once and reused indefinitely.
+Card data lives in `data/card_cache.jsonl`: one line per card with the Scryfall card object (images, prices and links stripped). Cards are fetched once and reused indefinitely.
+
+Don't flatten Scryfall data when storing it. `lib/card_model.py` turns the stored object into a `Card` with `Face`s, so new mechanics are handled there without re-fetching.
+
+## Multi-face cards and new mechanics
+
+Each face has *access modes* describing how it gets into play (`cast`, `transform`, `prepared`, `flip`, `meld`, ...). In `lib/card_model.py`:
+- `LAYOUT_ACCESS` maps a Scryfall `layout` to per-face modes. A new layout (like `prepare`) is one entry.
+- `KEYWORD_ACCESS` adds modes from keywords, for cards that mix mechanics (e.g. a `modal_dfc` whose front face can also transform).
+- Unknown layouts fall back to "front face castable" and emit a warning.
+
+Add a fixture to `tests/fixtures/scryfall/` (an invented card in Scryfall's real JSON shape, never real card text) and a case to `tests/test_card_model.py` for every new mechanic.
 
 To manually pre-populate the cache:
 ```bash
@@ -44,9 +58,9 @@ python -m uv run python agents/card_fetcher.py "Card Name 1" "Card Name 2"
 
 ## Upgrading to SQLite
 
-When the CSV cache gets unwieldy:
+When the JSON Lines cache gets unwieldy:
 1. Create `lib/cache_sql.py` implementing the same `CardCache` interface (`get`, `put`, `get_many`)
-2. In `agents/card_fetcher.py`, change `from lib.cache import CardCache` to `from lib.cache_sql import CardCache`
+2. In `agents/card_fetcher.py` and `agents/card_view.py`, change `from lib.cache import CardCache` to `from lib.cache_sql import CardCache`
 
 No other changes needed.
 
@@ -54,10 +68,13 @@ No other changes needed.
 
 ```
 agents/card_fetcher.py      sub-agent: Scryfall fetch + cache write
-lib/cache.py                CardCache class (CSV-backed)
+agents/card_view.py         sub-agent: compact card lines for the analysis
+lib/cache.py                CardCache class (JSON Lines)
+lib/card_model.py           Card/Face model, layout + keyword access rules
 lib/deck_parser.py          deck list parser
 lib/scryfall.py             Scryfall API client
-data/card_cache.csv         persistent card data
+data/card_cache.jsonl       persistent card data
+tests/fixtures/scryfall/    invented cards in Scryfall's JSON shape
 decks/                      your deck list files
 .claude/commands/           Claude Code skills
 ```

@@ -1,0 +1,187 @@
+{
+  "object": "card",
+  "id": "e6d852c4-bd5c-5293-9a86-5eacbf0ce8d5",
+  "oracle_id": "81f1bc88-dd7d-5b30-8921-b22fae0587fb",
+  "multiverse_ids": [],
+  "resource_id": "3189FE632A985519B669BDFDA3C947763189FE632A985519B669BDFDA3C94776",
+  "mtgo_id": 1004,
+  "arena_id": 1004,
+  "tcgplayer_id": 1004,
+  "cardmarket_id": 1004,
+  "name": "Lost Wanderer // Wandering Shade",
+  "lang": "en",
+  "released_at": "2026-01-01",
+  "uri": "https://api.example.invalid/lost-wanderer----wandering-shade/uri",
+  "scryfall_uri": "https://api.example.invalid/lost-wanderer----wandering-shade/scryfall_uri",
+  "layout": "transform",
+  "highres_image": true,
+  "image_status": "highres_scan",
+  "image_updated_at": "2026-01-01T00:00:00Z",
+  "cmc": 2.0,
+  "type_line": "Creature — Human Peasant // Creature — Spirit",
+  "color_identity": [
+    "W"
+  ],
+  "keywords": [
+    "Flying",
+    "Vigilance",
+    "Transform",
+    "Disturb"
+  ],
+  "card_faces": [
+    {
+      "object": "card_face",
+      "name": "Lost Wanderer",
+      "mana_cost": "{1}{W}",
+      "type_line": "Creature — Human Peasant",
+      "oracle_text": "{1}: This creature gets +0/+1 until end of turn.\nDisturb {2}{W}",
+      "colors": [
+        "W"
+      ],
+      "power": "0",
+      "toughness": "3",
+      "flavor_text": "Placeholder flavor text.",
+      "artist": "Test Artist",
+      "artist_id": "3862471a-dc68-5d07-a099-44a8370fe5aa",
+      "illustration_id": "363567ab-f023-5a6f-8fdb-5250320c50d0",
+      "image_uris": {
+        "small": "https://img.example.invalid/lost-wanderer/small",
+        "normal": "https://img.example.invalid/lost-wanderer/normal",
+        "large": "https://img.example.invalid/lost-wanderer/large",
+        "png": "https://img.example.invalid/lost-wanderer/png",
+        "art_crop": "https://img.example.invalid/lost-wanderer/art_crop",
+        "border_crop": "https://img.example.invalid/lost-wanderer/border_crop",
+        "thumb": "https://img.example.invalid/lost-wanderer/thumb",
+        "grid": "https://img.example.invalid/lost-wanderer/grid",
+        "display": "https://img.example.invalid/lost-wanderer/display",
+        "art": "https://img.example.invalid/lost-wanderer/art",
+        "crop": "https://img.example.invalid/lost-wanderer/crop"
+      }
+    },
+    {
+      "object": "card_face",
+      "name": "Wandering Shade",
+      "mana_cost": "",
+      "type_line": "Creature — Spirit",
+      "oracle_text": "Flying, vigilance\nWhen this creature leaves the battlefield, you gain 1 life.",
+      "colors": [
+        "W"
+      ],
+      "color_indicator": [
+        "W"
+      ],
+      "power": "3",
+      "toughness": "3",
+      "flavor_text": "Placeholder flavor text.",
+      "artist": "Test Artist",
+      "artist_id": "ec8fc4ef-2662-53cd-877a-911e7ea84a97",
+      "illustration_id": "1d93a531-88a3-5725-817e-7c97c6f1bbf2",
+      "image_uris": {
+        "small": "https://img.example.invalid/wandering-shade/small",
+        "normal": "https://img.example.invalid/wandering-shade/normal",
+        "large": "https://img.example.invalid/wandering-shade/large",
+        "png": "https://img.example.invalid/wandering-shade/png",
+        "art_crop": "https://img.example.invalid/wandering-shade/art_crop",
+        "border_crop": "https://img.example.invalid/wandering-shade/border_crop",
+        "thumb": "https://img.example.invalid/wandering-shade/thumb",
+        "grid": "https://img.example.invalid/wandering-shade/grid",
+        "display": "https://img.example.invalid/wandering-shade/display",
+        "art": "https://img.example.invalid/wandering-shade/art",
+        "crop": "https://img.example.invalid/wandering-shade/crop"
+      }
+    }
+  ],
+  "legalities": {
+    "standard": "not_legal",
+    "future": "not_legal",
+    "historic": "legal",
+    "timeless": "legal",
+    "gladiator": "legal",
+    "pioneer": "legal",
+    "modern": "legal",
+    "legacy": "legal",
+    "pauper": "legal",
+    "vintage": "legal",
+    "penny": "legal",
+    "commander": "legal",
+    "oathbreaker": "legal",
+    "standardbrawl": "legal",
+    "brawl": "legal",
+    "competitivebrawl": "legal",
+    "alchemy": "not_legal",
+    "paupercommander": "legal",
+    "duel": "legal",
+    "oldschool": "not_legal",
+    "premodern": "not_legal",
+    "predh": "not_legal",
+    "tlr": "legal"
+  },
+  "games": [
+    "arena",
+    "paper",
+    "mtgo"
+  ],
+  "reserved": false,
+  "game_changer": false,
+  "foil": true,
+  "nonfoil": true,
+  "finishes": [
+    "nonfoil",
+    "foil"
+  ],
+  "oversized": false,
+  "promo": false,
+  "reprint": false,
+  "variation": false,
+  "set_id": "6b15c0c1-6f3f-5362-afba-d249a74d1f30",
+  "set": "tst",
+  "set_name": "Test Set",
+  "set_type": "expansion",
+  "set_uri": "https://api.example.invalid/lost-wanderer----wandering-shade/set_uri",
+  "set_search_uri": "https://api.example.invalid/lost-wanderer----wandering-shade/set_search_uri",
+  "scryfall_set_uri": "https://api.example.invalid/lost-wanderer----wandering-shade/scryfall_set_uri",
+  "rulings_uri": "https://api.example.invalid/lost-wanderer----wandering-shade/rulings_uri",
+  "prints_search_uri": "https://api.example.invalid/lost-wanderer----wandering-shade/prints_search_uri",
+  "collector_number": "4",
+  "digital": false,
+  "rarity": "uncommon",
+  "artist": "Test Artist",
+  "artist_ids": [
+    "60e4fc08-ca82-5268-bd55-f7371a3e70b7"
+  ],
+  "border_color": "black",
+  "frame": "2015",
+  "frame_effects": [
+    "sunmoondfc"
+  ],
+  "full_art": false,
+  "textless": false,
+  "booster": true,
+  "story_spotlight": false,
+  "edhrec_rank": 1004,
+  "penny_rank": 1004,
+  "preview": {
+    "source": "Test",
+    "source_uri": "https://example.invalid",
+    "previewed_at": "2026-01-01"
+  },
+  "prices": {
+    "usd": null,
+    "usd_foil": null,
+    "usd_etched": null,
+    "eur": null,
+    "eur_foil": null,
+    "tix": null
+  },
+  "related_uris": {
+    "gatherer": "https://img.example.invalid/lost-wanderer----wandering-shade/gatherer",
+    "tcgplayer_infinite_articles": "https://img.example.invalid/lost-wanderer----wandering-shade/tcgplayer_infinite_articles",
+    "tcgplayer_infinite_decks": "https://img.example.invalid/lost-wanderer----wandering-shade/tcgplayer_infinite_decks",
+    "edhrec": "https://img.example.invalid/lost-wanderer----wandering-shade/edhrec"
+  },
+  "purchase_uris": {
+    "tcgplayer": "https://img.example.invalid/lost-wanderer----wandering-shade/tcgplayer",
+    "cardmarket": "https://img.example.invalid/lost-wanderer----wandering-shade/cardmarket",
+    "cardhoarder": "https://img.example.invalid/lost-wanderer----wandering-shade/cardhoarder"
+  }
+}

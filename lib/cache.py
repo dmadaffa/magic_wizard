@@ -1,24 +1,17 @@
-"""CSV-backed card cache with a swappable interface.
+"""JSON Lines card cache with a swappable interface.
+
+Each line is {"name": <deck name>, "fetched_at": <iso time>, "scryfall": <trimmed card object>}.
+Interpret entries with lib.card_model.from_scryfall(entry["scryfall"]).
 
 To upgrade to SQLite: create lib/cache_sql.py implementing the same
-CardCache interface, then change the import in agents/card_fetcher.py.
+CardCache interface, then change the import in agents/card_fetcher.py and agents/card_view.py.
 """
 
-import csv
-import os
+import json
 from datetime import datetime, timezone
 from pathlib import Path
 
-CACHE_PATH = Path(__file__).parent.parent / "data" / "card_cache.csv"
-
-COLUMNS = [
-    "name", "mana_cost", "cmc", "type_line",
-    "colors", "color_identity", "oracle_text",
-    "power", "toughness", "loyalty",
-    "legal_standard", "legal_modern", "legal_pioneer",
-    "legal_legacy", "legal_commander",
-    "fetched_at",
-]
+CACHE_PATH = Path(__file__).parent.parent / "data" / "card_cache.jsonl"
 
 
 class CardCache:
@@ -26,12 +19,12 @@ class CardCache:
         self._path = path
         self._path.parent.mkdir(parents=True, exist_ok=True)
         if not self._path.exists():
-            with open(self._path, "w", newline="", encoding="utf-8") as f:
-                csv.DictWriter(f, fieldnames=COLUMNS).writeheader()
+            self._path.touch()
 
     def _load(self) -> dict[str, dict]:
-        with open(self._path, newline="", encoding="utf-8") as f:
-            return {row["name"]: row for row in csv.DictReader(f)}
+        with open(self._path, encoding="utf-8") as f:
+            entries = (json.loads(line) for line in f if line.strip())
+            return {entry["name"]: entry for entry in entries}
 
     def get(self, name: str) -> dict | None:
         return self._load().get(name)
@@ -40,13 +33,13 @@ class CardCache:
         store = self._load()
         return {name: store.get(name) for name in names}
 
-    def put(self, name: str, data: dict) -> None:
+    def put(self, name: str, card: dict) -> None:
         store = self._load()
-        entry = {col: data.get(col, "") for col in COLUMNS}
-        entry["name"] = name
-        entry["fetched_at"] = datetime.now(timezone.utc).isoformat()
-        store[name] = entry
-        with open(self._path, "w", newline="", encoding="utf-8") as f:
-            writer = csv.DictWriter(f, fieldnames=COLUMNS)
-            writer.writeheader()
-            writer.writerows(store.values())
+        store[name] = {
+            "name": name,
+            "fetched_at": datetime.now(timezone.utc).isoformat(),
+            "scryfall": card,
+        }
+        with open(self._path, "w", encoding="utf-8", newline="\n") as f:
+            for entry in store.values():
+                f.write(json.dumps(entry, ensure_ascii=False) + "\n")

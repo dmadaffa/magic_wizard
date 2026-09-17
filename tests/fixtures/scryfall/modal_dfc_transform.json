@@ -1,0 +1,182 @@
+{
+  "object": "card",
+  "id": "b5d75064-ef72-5c22-a6e3-225b5402b683",
+  "oracle_id": "e340c27a-4109-5342-9f6a-e4bc1f80a618",
+  "multiverse_ids": [],
+  "resource_id": "FAB5691AE4305756A2070E55307F54EAFAB5691AE4305756A2070E55307F54EA",
+  "mtgo_id": 1006,
+  "arena_id": 1006,
+  "tcgplayer_id": 1006,
+  "cardmarket_id": 1006,
+  "name": "Mara Voss // Mara the Unbroken",
+  "lang": "en",
+  "released_at": "2026-01-01",
+  "uri": "https://api.example.invalid/mara-voss----mara-the-unbroken/uri",
+  "scryfall_uri": "https://api.example.invalid/mara-voss----mara-the-unbroken/scryfall_uri",
+  "layout": "modal_dfc",
+  "highres_image": true,
+  "image_status": "highres_scan",
+  "image_updated_at": "2026-01-01T00:00:00Z",
+  "cmc": 2.0,
+  "type_line": "Legendary Creature — Human Advocate // Legendary Creature — Giant Hero",
+  "color_identity": [
+    "G",
+    "W"
+  ],
+  "keywords": [
+    "Reach",
+    "Transform",
+    "Trample"
+  ],
+  "card_faces": [
+    {
+      "object": "card_face",
+      "name": "Mara Voss",
+      "mana_cost": "{G}{W}",
+      "type_line": "Legendary Creature — Human Advocate",
+      "oracle_text": "Spells your opponents cast during your turn cost {1} more.\n{3}{G}{W}{W}: Transform Mara Voss. Activate only as a sorcery.",
+      "colors": [
+        "G",
+        "W"
+      ],
+      "power": "1",
+      "toughness": "4",
+      "flavor_text": "Placeholder flavor text.",
+      "artist": "Test Artist",
+      "artist_id": "d3f864bf-c56c-599d-892c-d96e8488eb11",
+      "illustration_id": "23793ad1-d6d9-5b2e-bb09-209df707e551",
+      "image_uris": {
+        "small": "https://img.example.invalid/mara-voss/small",
+        "normal": "https://img.example.invalid/mara-voss/normal",
+        "large": "https://img.example.invalid/mara-voss/large",
+        "png": "https://img.example.invalid/mara-voss/png",
+        "art_crop": "https://img.example.invalid/mara-voss/art_crop",
+        "border_crop": "https://img.example.invalid/mara-voss/border_crop",
+        "thumb": "https://img.example.invalid/mara-voss/thumb",
+        "grid": "https://img.example.invalid/mara-voss/grid",
+        "display": "https://img.example.invalid/mara-voss/display",
+        "art": "https://img.example.invalid/mara-voss/art",
+        "crop": "https://img.example.invalid/mara-voss/crop"
+      }
+    },
+    {
+      "object": "card_face",
+      "name": "Mara the Unbroken",
+      "mana_cost": "{3}{G}{W}{W}",
+      "type_line": "Legendary Creature — Giant Hero",
+      "oracle_text": "Reach, trample\nWhenever this creature attacks, put a +1/+1 counter on it.",
+      "colors": [
+        "G",
+        "W"
+      ],
+      "power": "6",
+      "toughness": "6",
+      "artist": "Test Artist",
+      "artist_id": "945ca5ac-aa20-5980-99dc-0967cfd5ef4b",
+      "illustration_id": "dd64552e-7c3e-546b-ad05-b1d4b163a9c5",
+      "image_uris": {
+        "small": "https://img.example.invalid/mara-the-unbroken/small",
+        "normal": "https://img.example.invalid/mara-the-unbroken/normal",
+        "large": "https://img.example.invalid/mara-the-unbroken/large",
+        "png": "https://img.example.invalid/mara-the-unbroken/png",
+        "art_crop": "https://img.example.invalid/mara-the-unbroken/art_crop",
+        "border_crop": "https://img.example.invalid/mara-the-unbroken/border_crop",
+        "thumb": "https://img.example.invalid/mara-the-unbroken/thumb",
+        "grid": "https://img.example.invalid/mara-the-unbroken/grid",
+        "display": "https://img.example.invalid/mara-the-unbroken/display",
+        "art": "https://img.example.invalid/mara-the-unbroken/art",
+        "crop": "https://img.example.invalid/mara-the-unbroken/crop"
+      }
+    }
+  ],
+  "legalities": {
+    "standard": "not_legal",
+    "future": "not_legal",
+    "historic": "legal",
+    "timeless": "legal",
+    "gladiator": "legal",
+    "pioneer": "legal",
+    "modern": "legal",
+    "legacy": "legal",
+    "pauper": "legal",
+    "vintage": "legal",
+    "penny": "legal",
+    "commander": "legal",
+    "oathbreaker": "legal",
+    "standardbrawl": "legal",
+    "brawl": "legal",
+    "competitivebrawl": "legal",
+    "alchemy": "not_legal",
+    "paupercommander": "legal",
+    "duel": "legal",
+    "oldschool": "not_legal",
+    "premodern": "not_legal",
+    "predh": "not_legal",
+    "tlr": "legal"
+  },
+  "games": [
+    "paper",
+    "mtgo",
+    "arena"
+  ],
+  "reserved": false,
+  "game_changer": false,
+  "foil": true,
+  "nonfoil": true,
+  "finishes": [
+    "nonfoil",
+    "foil"
+  ],
+  "oversized": false,
+  "promo": false,
+  "reprint": false,
+  "variation": false,
+  "set_id": "ced912c7-5f54-522c-ae35-095a0f4668d9",
+  "set": "tst",
+  "set_name": "Test Set",
+  "set_type": "expansion",
+  "set_uri": "https://api.example.invalid/mara-voss----mara-the-unbroken/set_uri",
+  "set_search_uri": "https://api.example.invalid/mara-voss----mara-the-unbroken/set_search_uri",
+  "scryfall_set_uri": "https://api.example.invalid/mara-voss----mara-the-unbroken/scryfall_set_uri",
+  "rulings_uri": "https://api.example.invalid/mara-voss----mara-the-unbroken/rulings_uri",
+  "prints_search_uri": "https://api.example.invalid/mara-voss----mara-the-unbroken/prints_search_uri",
+  "collector_number": "6",
+  "digital": false,
+  "rarity": "mythic",
+  "artist": "Test Artist",
+  "artist_ids": [
+    "cc0c73aa-b760-501f-a54f-2faeb9171165"
+  ],
+  "border_color": "black",
+  "frame": "2015",
+  "frame_effects": [
+    "legendary"
+  ],
+  "security_stamp": "oval",
+  "full_art": false,
+  "textless": false,
+  "booster": false,
+  "story_spotlight": false,
+  "promo_types": [
+    "test"
+  ],
+  "edhrec_rank": 1006,
+  "prices": {
+    "usd": null,
+    "usd_foil": null,
+    "usd_etched": null,
+    "eur": null,
+    "eur_foil": null,
+    "tix": null
+  },
+  "related_uris": {
+    "tcgplayer_infinite_articles": "https://img.example.invalid/mara-voss----mara-the-unbroken/tcgplayer_infinite_articles",
+    "tcgplayer_infinite_decks": "https://img.example.invalid/mara-voss----mara-the-unbroken/tcgplayer_infinite_decks",
+    "edhrec": "https://img.example.invalid/mara-voss----mara-the-unbroken/edhrec"
+  },
+  "purchase_uris": {
+    "tcgplayer": "https://img.example.invalid/mara-voss----mara-the-unbroken/tcgplayer",
+    "cardmarket": "https://img.example.invalid/mara-voss----mara-the-unbroken/cardmarket",
+    "cardhoarder": "https://img.example.invalid/mara-voss----mara-the-unbroken/cardhoarder"
+  }
+}

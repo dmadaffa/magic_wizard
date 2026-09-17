@@ -6,3 +6,12 @@ __pycache__/
 *.egg-info/
 dist/
 build/
+
+# Card data and deck lists stay local: Magic card content is third-party IP
+data/
+decks/*
+!decks/.gitkeep
+inputs/
+
+# Local working notes
+BUGS.md

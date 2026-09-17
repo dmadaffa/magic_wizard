@@ -1,0 +1,162 @@
+{
+  "object": "card",
+  "id": "c9e036c1-de3d-5a43-80cb-9df668321d90",
+  "oracle_id": "e16ae0ea-9b19-5448-9784-fcb4279ba101",
+  "multiverse_ids": [],
+  "name": "Dawnfall Colossus",
+  "lang": "en",
+  "released_at": "2026-01-01",
+  "uri": "https://api.example.invalid/dawnfall-colossus/uri",
+  "scryfall_uri": "https://api.example.invalid/dawnfall-colossus/scryfall_uri",
+  "layout": "meld",
+  "highres_image": true,
+  "image_status": "highres_scan",
+  "image_updated_at": "2026-01-01T00:00:00Z",
+  "image_uris": {
+    "small": "https://img.example.invalid/dawnfall-colossus/small",
+    "normal": "https://img.example.invalid/dawnfall-colossus/normal",
+    "large": "https://img.example.invalid/dawnfall-colossus/large",
+    "png": "https://img.example.invalid/dawnfall-colossus/png",
+    "art_crop": "https://img.example.invalid/dawnfall-colossus/art_crop",
+    "border_crop": "https://img.example.invalid/dawnfall-colossus/border_crop",
+    "thumb": "https://img.example.invalid/dawnfall-colossus/thumb",
+    "grid": "https://img.example.invalid/dawnfall-colossus/grid",
+    "display": "https://img.example.invalid/dawnfall-colossus/display",
+    "art": "https://img.example.invalid/dawnfall-colossus/art",
+    "crop": "https://img.example.invalid/dawnfall-colossus/crop"
+  },
+  "mana_cost": "",
+  "cmc": 10.0,
+  "type_line": "Legendary Creature — Angel",
+  "oracle_text": "Flying, first strike, vigilance, lifelink",
+  "power": "8",
+  "toughness": "8",
+  "colors": [],
+  "color_identity": [
+    "W"
+  ],
+  "keywords": [
+    "Flying",
+    "Lifelink",
+    "Vigilance",
+    "First strike"
+  ],
+  "all_parts": [
+    {
+      "object": "related_card",
+      "id": "4cd6a644-515f-581a-a523-4be27f447d69",
+      "component": "meld_result",
+      "name": "Dawnfall Colossus",
+      "type_line": "Legendary Creature — Angel",
+      "uri": "https://api.example.invalid/dawnfall-colossus"
+    },
+    {
+      "object": "related_card",
+      "id": "d50d790f-24e5-5948-b383-34d3678d8a3a",
+      "component": "meld_part",
+      "name": "Dawn Sentinel",
+      "type_line": "Legendary Creature — Angel",
+      "uri": "https://api.example.invalid/dawn-sentinel"
+    },
+    {
+      "object": "related_card",
+      "id": "21b4e6a2-288b-5610-b9a9-71a655550bb3",
+      "component": "meld_part",
+      "name": "Dusk Sentinel",
+      "type_line": "Legendary Creature — Angel",
+      "uri": "https://api.example.invalid/dusk-sentinel"
+    }
+  ],
+  "legalities": {
+    "standard": "not_legal",
+    "future": "not_legal",
+    "historic": "legal",
+    "timeless": "legal",
+    "gladiator": "legal",
+    "pioneer": "legal",
+    "modern": "legal",
+    "legacy": "legal",
+    "pauper": "legal",
+    "vintage": "legal",
+    "penny": "legal",
+    "commander": "legal",
+    "oathbreaker": "legal",
+    "standardbrawl": "legal",
+    "brawl": "legal",
+    "competitivebrawl": "legal",
+    "alchemy": "not_legal",
+    "paupercommander": "legal",
+    "duel": "legal",
+    "oldschool": "not_legal",
+    "premodern": "not_legal",
+    "predh": "not_legal",
+    "tlr": "legal"
+  },
+  "games": [
+    "paper"
+  ],
+  "reserved": false,
+  "game_changer": false,
+  "foil": true,
+  "nonfoil": true,
+  "finishes": [
+    "nonfoil",
+    "foil"
+  ],
+  "oversized": false,
+  "promo": false,
+  "reprint": true,
+  "variation": false,
+  "set_id": "356bd8d5-d0a9-54c1-92df-e3ce52713357",
+  "set": "tst",
+  "set_name": "Test Set",
+  "set_type": "masters",
+  "set_uri": "https://api.example.invalid/dawnfall-colossus/set_uri",
+  "set_search_uri": "https://api.example.invalid/dawnfall-colossus/set_search_uri",
+  "scryfall_set_uri": "https://api.example.invalid/dawnfall-colossus/scryfall_set_uri",
+  "rulings_uri": "https://api.example.invalid/dawnfall-colossus/rulings_uri",
+  "prints_search_uri": "https://api.example.invalid/dawnfall-colossus/prints_search_uri",
+  "collector_number": "13",
+  "digital": false,
+  "rarity": "mythic",
+  "flavor_text": "Placeholder flavor text.",
+  "card_back_id": "21a7c83e-31fc-51c4-ad41-28a4a0aafb3e",
+  "artist": "Test Artist",
+  "artist_ids": [
+    "1332eea9-b7ea-521c-9738-4373fc078741"
+  ],
+  "illustration_id": "15a3c8af-453f-5724-9d57-1c1091b86f9b",
+  "border_color": "black",
+  "frame": "2015",
+  "frame_effects": [
+    "legendary"
+  ],
+  "full_art": false,
+  "textless": false,
+  "booster": true,
+  "story_spotlight": false,
+  "preview": {
+    "source": "Test",
+    "source_uri": "https://example.invalid",
+    "previewed_at": "2026-01-01"
+  },
+  "prices": {
+    "usd": null,
+    "usd_foil": null,
+    "usd_etched": null,
+    "eur": null,
+    "eur_foil": null,
+    "tix": null
+  },
+  "related_uris": {
+    "gatherer": "https://img.example.invalid/dawnfall-colossus/gatherer",
+    "tcgplayer_infinite_articles": "https://img.example.invalid/dawnfall-colossus/tcgplayer_infinite_articles",
+    "tcgplayer_infinite_decks": "https://img.example.invalid/dawnfall-colossus/tcgplayer_infinite_decks",
+    "edhrec": "https://img.example.invalid/dawnfall-colossus/edhrec"
+  },
+  "purchase_uris": {
+    "tcgplayer": "https://img.example.invalid/dawnfall-colossus/tcgplayer",
+    "cardmarket": "https://img.example.invalid/dawnfall-colossus/cardmarket",
+    "cardhoarder": "https://img.example.invalid/dawnfall-colossus/cardhoarder"
+  }
+}
