@@ -1,0 +1,2 @@
+# Hooks run under sh: keep LF even with core.autocrlf=true
+.githooks/* text eol=lf
