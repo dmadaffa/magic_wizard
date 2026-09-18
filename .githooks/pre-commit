@@ -1,0 +1,4 @@
+#!/bin/sh
+# Block commits that add real Magic card names (see CLAUDE.md, "Card content is IP").
+# Enable once per clone: git config core.hooksPath .githooks
+exec python -m uv run python scripts/check_ip.py --staged

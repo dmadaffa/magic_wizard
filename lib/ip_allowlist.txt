@@ -1,0 +1,37 @@
+# Card names that are also plain words, so they are not flagged by scripts/check_ip.py.
+# Only add single ordinary words or rules terms; never a distinctive card name.
+
+# Basic lands
+Plains
+Island
+Swamp
+Mountain
+Forest
+Wastes
+
+# Rules terms and keywords
+X
+Vigilance
+Lifelink
+Response
+Arena
+
+# Everyday words (prose, code comments, parts of invented names)
+When
+Return
+Run
+Extract
+Balance
+Cut
+Blaze
+Jolt
+Dawn
+Dusk
+Sentinel
+Colossus
+Warden
+Oracle
+Hall
+Find
+Python
+Catalog

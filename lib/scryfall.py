@@ -65,6 +65,13 @@ def fetch_card(name: str) -> dict:
     return trim_card(resp.json())
 
 
+def fetch_card_names() -> list[str]:
+    """Every card name Scryfall knows (one /catalog/card-names request)."""
+    resp = _get_with_backoff(f"{BASE_URL}/catalog/card-names", headers=_HEADERS, timeout=30)
+    resp.raise_for_status()
+    return resp.json()["data"]
+
+
 def _trim(obj: dict) -> dict:
     return {k: v for k, v in obj.items() if k not in _DROP_KEYS}
 

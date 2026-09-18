@@ -2,6 +2,8 @@
 
 > **Open bug backlog:** see `BUGS.md` before starting new work. For each bug: write a failing test first (fixtures: Scryfall's real JSON shape, invented card content), then fix, then tick the box. Don't mark a bug done unless its test fails without the fix.
 
+> **Card content is IP.** No real card names, rules text or Scryfall ids in any tracked file except this one: use invented cards in tests, fixtures, docstrings and examples. `scripts/check_ip.py` enforces it via a pre-commit hook; enable it once per clone with `git config core.hooksPath .githooks`. Names that are also plain words go in `lib/ip_allowlist.txt`. Cost and accuracy numbers: `docs/benchmarks.md`.
+
 Agentic system for analyzing Magic: The Gathering decks. Uses Scryfall as the card data source and a local JSON Lines cache to avoid redundant API calls.
 
 ## Quick Start
@@ -73,7 +75,11 @@ lib/cache.py                CardCache class (JSON Lines)
 lib/card_model.py           Card/Face model, layout + keyword access rules
 lib/deck_parser.py          deck list parser
 lib/scryfall.py             Scryfall API client
+lib/ip_check.py             real-card-name detection (+ ip_allowlist.txt)
+scripts/check_ip.py         IP check CLI, run by .githooks/pre-commit
+docs/benchmarks.md          measured cost of features, with revisit thresholds
 data/card_cache.jsonl       persistent card data
+data/card_names.json        Scryfall name catalog for the IP check (30-day refresh)
 tests/fixtures/scryfall/    invented cards in Scryfall's JSON shape
 decks/                      your deck list files
 .claude/commands/           Claude Code skills
