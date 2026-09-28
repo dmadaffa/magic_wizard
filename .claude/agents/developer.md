@@ -35,8 +35,9 @@ End with this report and nothing after it:
 - <file>: <what changed and why, one line each>
 
 ### Tests
-- Added: <test names>
-- Failing before the fix: <paste the short pytest failure summary>
+- Added (label each test or parametrized case group, see docs/agent-rules.md):
+  - `<test name>` — reproduces | guard: <over-fix it catches> | decision: <choice it pins>
+- Failing before the fix: <paste the short pytest failure summary; it must match the tests labelled "reproduces">
 - Full suite after: <N passed>
 - IP check: <hits in touched files: 0>
 

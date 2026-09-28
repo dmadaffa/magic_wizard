@@ -28,6 +28,7 @@ You are read-only. Never edit, create or delete files in the repository, and nev
 
 ### 2. Tests
 - **They must fail without the fix.** Prove it rather than trusting the report: create a temporary worktree at the base revision in the scratchpad (`git worktree add <scratch>/base HEAD`), copy only the new or changed test files into it, and run them there. They should fail for the reason the task describes. Remove the worktree afterwards with `git worktree remove`.
+- **Labels match reality.** Using that run, check the developer's labels (reproduces / guard / decision, defined in `docs/agent-rules.md`). Every "reproduces" test must fail on the base revision, and at least one must exist. Every "guard" must name a realistic over-fix that it would actually catch; a guard that no plausible wrong fix could break is redundant. A test that passes before the fix without a label, or without a convincing purpose, is a finding.
 - **They test behaviour, not implementation.** They go through the public entry points and assert on observable results. Red flags: asserting on private helpers or internal state, mocks of the code under test, assertions that only check a mock was called, tests that restate the implementation line by line.
 - **Mocks only at the boundary** (HTTP, clock, filesystem when needed). A test made mostly of mocks proves nothing.
 - **No repetition.** Tests shouldn't duplicate each other or existing tests. Cases that differ only in their data should be parametrised. Each test should check one clearly named behaviour.
@@ -59,6 +60,7 @@ End with this report and nothing after it:
 
 ### Verification
 - Tests without the fix: <fail as expected / pass (tests don't prove the fix) / not checked + why>
+- Test labels: <all consistent / mismatches listed under findings>
 - Full suite: <N passed / failures>
 - IP check: <0 hits / hits>
 

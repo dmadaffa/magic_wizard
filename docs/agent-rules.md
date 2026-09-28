@@ -20,6 +20,11 @@ To add a rule, append a section here. Keep each rule short and say why it exists
 ## Tests
 
 - Test first: write a test that reproduces the bug or specifies the feature, run it, and confirm it fails for the expected reason before changing the code.
+- Every added test (or parametrized case group) has one purpose, and the report labels it:
+  - **reproduces**: fails before the fix, passes after. Every task needs at least one.
+  - **guard**: passes before and after. It protects existing behaviour against a realistic over-fix (e.g. a looser regex that would also strip parts of real names). Name the over-fix it catches.
+  - **decision**: pins a choice the task left open (and may pass before). Name the choice.
+  A test that passes before the fix and is none of these doesn't belong in the change.
 - Scryfall fixtures go in `tests/fixtures/scryfall/`: Scryfall's real JSON shape, invented content. Don't hand-write the structure; base it on a real API response, then anonymise.
 - Test behaviour through public functions (`parse`, `Card.from_scryfall`, CLI output), not private helpers or internal state.
 - Mock only at the system boundary (HTTP calls to Scryfall, the clock). Never mock the code under test.
