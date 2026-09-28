@@ -4,6 +4,15 @@ import re
 import sys
 
 SIDEBOARD_MARKERS = {"sideboard", "side", "sb"}
+# Plain header lines (Arena export style) → output section
+SECTION_HEADERS = {
+    "commander": "commander",
+    "companion": "companion",
+    "deck": "main",
+    "sideboard": "side",
+    "side": "side",
+    "sb": "side",
+}
 KNOWN_FORMATS = {"standard", "pioneer", "modern", "legacy", "vintage", "commander", "pauper", "historic", "explorer", "alchemy"}
 COMMENT_RE = re.compile(r"^//")
 CARD_LINE_RE = re.compile(r"^(\d+)x?\s+(.+)$")
@@ -26,37 +35,51 @@ def _extract_format(text: str) -> str | None:
     return None
 
 
+def _is_sideboard_comment(line: str) -> bool:
+    lower = line.lstrip("/ ").lower()
+    return any(lower.startswith(m) for m in SIDEBOARD_MARKERS)
+
+
+def _has_explicit_sections(lines: list[str]) -> bool:
+    """True if any line is a section header, a sideboard comment or an SB: prefix."""
+    for line in lines:
+        if line.lower() in SECTION_HEADERS or line.upper().startswith("SB:"):
+            return True
+        if COMMENT_RE.match(line) and _is_sideboard_comment(line):
+            return True
+    return False
+
+
 def parse(text: str) -> dict:
-    main = []
-    side = []
-    in_sideboard = False
-    blank_seen = False
+    sections = {"commander": [], "companion": [], "main": [], "side": []}
+    lines = [raw.strip() for raw in text.splitlines()]
+    # Without explicit markers, the first blank line after a card starts the sideboard.
+    # With them, blank lines only group cards (e.g. creatures / spells / lands).
+    blank_starts_side = not _has_explicit_sections(lines)
+    current = "main"
 
-    for raw_line in text.splitlines():
-        line = raw_line.strip()
-
+    for line in lines:
         if not line:
-            # A blank line after at least one main-deck card = sideboard starts
-            if main:
-                blank_seen = True
+            if current in ("commander", "companion"):
+                current = "main"
+            elif blank_starts_side and sections["main"]:
+                current = "side"
             continue
 
         if COMMENT_RE.match(line):
-            # Check if comment signals sideboard
-            lower = line.lstrip("/ ").lower()
-            if any(lower.startswith(m) for m in SIDEBOARD_MARKERS):
-                in_sideboard = True
+            if _is_sideboard_comment(line):
+                current = "side"
             continue
 
-        # Plain section header (e.g. "Deck", "Sideboard") — no leading digit
-        if line.lower() in SIDEBOARD_MARKERS:
-            in_sideboard = True
+        if line.lower() in SECTION_HEADERS:
+            current = SECTION_HEADERS[line.lower()]
             continue
 
+        target = current
         # "SB: N CardName" Arena format
         if line.upper().startswith("SB:"):
             line = line[3:].strip()
-            in_sideboard = True
+            target = "side"
 
         m = CARD_LINE_RE.match(line)
         if not m:
@@ -64,19 +87,15 @@ def parse(text: str) -> dict:
 
         qty = int(m.group(1))
         name = _ARENA_SUFFIX_RE.sub("", m.group(2).strip())
-        entry = {"qty": qty, "name": name}
+        sections[target].append({"qty": qty, "name": name})
 
-        if in_sideboard or blank_seen:
-            side.append(entry)
-        else:
-            main.append(entry)
-
-    return {"main": main, "side": side, "format": _extract_format(text)}
+    return {**sections, "format": _extract_format(text)}
 
 
 def unique_names(deck: dict) -> list[str]:
-    names = {e["name"] for e in deck["main"]}
-    names |= {e["name"] for e in deck["side"]}
+    names = set()
+    for section in ("commander", "companion", "main", "side"):
+        names |= {e["name"] for e in deck.get(section, [])}
     return sorted(names)
 
 
@@ -93,5 +112,8 @@ if __name__ == "__main__":
     side_count = sum(e["qty"] for e in deck["side"])
     print(f"Main deck: {main_count} cards ({len(deck['main'])} unique)")
     print(f"Sideboard: {side_count} cards ({len(deck['side'])} unique)")
+    for section in ("commander", "companion"):
+        if deck[section]:
+            print(f"{section.title()}: {', '.join(e['name'] for e in deck[section])}")
     print(f"Format: {deck['format'] or 'unknown'}")
     print(json.dumps(deck, indent=2))

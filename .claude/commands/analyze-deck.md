@@ -22,27 +22,29 @@ uv run python lib/deck_parser.py <file-path>
 Read the JSON output. It contains:
 - `main` — list of `{qty, name}` for main deck cards
 - `side` — list of `{qty, name}` for sideboard cards
+- `commander` — list of `{qty, name}` for the commander(s), empty if none
+- `companion` — list of `{qty, name}` for the companion, empty if none (Arena also lists it in `side`)
 - `format` — format name extracted from the deck's title comment, or `null`
 
 **Active format**: use the explicit format argument if one was provided; otherwise fall back to the `format` field from the JSON; otherwise treat as unknown.
 
 ### Step 2 — Populate the card cache
-Extract all unique card names from both `main` and `side`.
+Extract all unique card names from `commander`, `companion`, `main` and `side`.
 Run the card fetcher sub-agent to fetch any cards not already in the cache:
 ```
 uv run python agents/card_fetcher.py "<card1>" "<card2>" ...
 ```
-Pass ALL unique card names (main + sideboard) in a single call. The fetcher handles cache hits itself.
+Pass ALL unique card names (every section) in a single call. The fetcher handles cache hits itself.
 
 ### Step 3 — Load card data
-Run the card view for all unique card names (main + sideboard) in a single call:
+Run the card view for all unique card names (every section) in a single call:
 ```
 uv run python agents/card_view.py "<card1>" "<card2>" ...
 ```
 Do not read `data/card_cache.jsonl` directly. The output has one block per card:
 ```
-Ember Sting | {R} | CMC 1 | identity R | Instant | standard:not_legal, modern:legal, ...
-    Ember Sting deals 2 damage to any target.
+Cinderquill Volley | {R} | CMC 1 | identity R | Instant | standard:not_legal, modern:legal, ...
+    Cinderquill Volley deals 2 damage to any target.
 Tidewatch Apprentice // Tidewatch Horror | transform | CMC 1 | identity U | standard:not_legal, ...
   [face 1: cast] Tidewatch Apprentice | {U} | Creature — Human Apprentice | 1/2
     At the beginning of your upkeep, ...

@@ -27,7 +27,7 @@ Create a `.txt` file in `decks/` using standard MTGO/Arena format:
 2 Gravel Warden
 ```
 
-Supported sideboard separators: `//`, `SB:`, or a blank line between main deck and sideboard.
+Supported sideboard separators: `// Sideboard`, a `Sideboard` line, or an `SB:` prefix. Arena section headers (`Commander`, `Companion`, `Deck`, `Sideboard`) are recognized. A blank line starts the sideboard only when the file has none of these markers; otherwise blank lines just group cards.
 
 ## How It Works
 

@@ -76,3 +76,84 @@ def test_unique_names_includes_both_main_and_side():
     names = unique_names(parse(text))
     assert "Emberquill Volley" in names
     assert "Rustmoor Reliquary" in names
+
+
+# Bug #2: blank lines only start the sideboard when the file has no explicit marker
+
+def test_blank_lines_group_main_deck_when_sideboard_header_exists():
+    text = "4 Glimmerfen Scout\n4 Emberquill Volley\n\n20 Island\n\nSideboard\n2 Rustmoor Reliquary"
+    deck = parse(text)
+    assert [e["name"] for e in deck["main"]] == ["Glimmerfen Scout", "Emberquill Volley", "Island"]
+    assert deck["side"] == [{"qty": 2, "name": "Rustmoor Reliquary"}]
+
+
+def test_blank_lines_group_main_deck_when_comment_marker_exists():
+    text = "4 Glimmerfen Scout\n\n20 Island\n// Sideboard\n2 Rustmoor Reliquary"
+    deck = parse(text)
+    assert [e["name"] for e in deck["main"]] == ["Glimmerfen Scout", "Island"]
+    assert [e["name"] for e in deck["side"]] == ["Rustmoor Reliquary"]
+
+
+def test_blank_lines_group_main_deck_when_sb_prefix_exists():
+    text = "4 Glimmerfen Scout\n\n20 Island\nSB: 2 Rustmoor Reliquary"
+    deck = parse(text)
+    assert [e["name"] for e in deck["main"]] == ["Glimmerfen Scout", "Island"]
+    assert [e["name"] for e in deck["side"]] == ["Rustmoor Reliquary"]
+
+
+def test_blank_lines_after_deck_header_stay_in_main():
+    text = "Deck\n4 Glimmerfen Scout\n\n20 Island\n"
+    deck = parse(text)
+    assert [e["name"] for e in deck["main"]] == ["Glimmerfen Scout", "Island"]
+    assert deck["side"] == []
+
+
+def test_trailing_blank_line_after_sideboard_is_harmless():
+    deck = parse("Deck\n4 Glimmerfen Scout\n\nSideboard\n2 Rustmoor Reliquary\n\n")
+    assert [e["name"] for e in deck["main"]] == ["Glimmerfen Scout"]
+    assert [e["name"] for e in deck["side"]] == ["Rustmoor Reliquary"]
+
+
+# Bug #3: Arena section headers (Commander, Companion, Deck, Sideboard)
+
+def test_arena_commander_export():
+    text = "Commander\n1 Vessra, Tide Regent\n\nDeck\n1 Brass Orrery\n1 Island"
+    deck = parse(text)
+    assert deck["commander"] == [{"qty": 1, "name": "Vessra, Tide Regent"}]
+    assert [e["name"] for e in deck["main"]] == ["Brass Orrery", "Island"]
+    assert deck["side"] == []
+
+
+def test_arena_export_with_companion_and_sideboard():
+    text = (
+        "Companion\n1 Mossback Warden\n\n"
+        "Deck\n4 Glimmerfen Scout\n\n"
+        "Sideboard\n1 Mossback Warden\n2 Rustmoor Reliquary\n"
+    )
+    deck = parse(text)
+    assert deck["companion"] == [{"qty": 1, "name": "Mossback Warden"}]
+    assert [e["name"] for e in deck["main"]] == ["Glimmerfen Scout"]
+    assert [e["name"] for e in deck["side"]] == ["Mossback Warden", "Rustmoor Reliquary"]
+
+
+def test_commander_section_ends_at_blank_line_without_deck_header():
+    deck = parse("Commander\n1 Vessra, Tide Regent\n\n1 Brass Orrery\n1 Island")
+    assert [e["name"] for e in deck["commander"]] == ["Vessra, Tide Regent"]
+    assert [e["name"] for e in deck["main"]] == ["Brass Orrery", "Island"]
+    assert deck["side"] == []
+
+
+def test_section_headers_are_case_insensitive():
+    deck = parse("COMMANDER\n1 Vessra, Tide Regent\n\ndeck\n1 Island")
+    assert [e["name"] for e in deck["commander"]] == ["Vessra, Tide Regent"]
+    assert [e["name"] for e in deck["main"]] == ["Island"]
+
+
+def test_decks_without_commander_have_empty_commander_and_companion():
+    deck = parse("4 Glimmerfen Scout")
+    assert deck["commander"] == [] and deck["companion"] == []
+
+
+def test_unique_names_includes_commander_and_companion():
+    text = "Commander\n1 Vessra, Tide Regent\nCompanion\n1 Mossback Warden\nDeck\n1 Island"
+    assert unique_names(parse(text)) == ["Island", "Mossback Warden", "Vessra, Tide Regent"]
