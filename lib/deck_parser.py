@@ -16,8 +16,9 @@ SECTION_HEADERS = {
 KNOWN_FORMATS = {"standard", "pioneer", "modern", "legacy", "vintage", "commander", "pauper", "historic", "explorer", "alchemy"}
 COMMENT_RE = re.compile(r"^//")
 CARD_LINE_RE = re.compile(r"^(\d+)x?\s+(.+)$")
-# Strips Arena/MTGO set-code suffix: "Card Name (SET) 123" → "Card Name"
-_ARENA_SUFFIX_RE = re.compile(r"\s+\([A-Z0-9]+\)\s+\d+$")
+# Strips Arena/MTGO set-code suffix: "Card Name (SET) 123" → "Card Name".
+# Collector numbers: 123, 276p, 12★, or SET-123 style (ABC-123).
+_ARENA_SUFFIX_RE = re.compile(r"\s+\([A-Z0-9]+\)\s+(?:[A-Z0-9]+-)?\d+[A-Za-z★]*$")
 
 
 def _extract_format(text: str) -> str | None:

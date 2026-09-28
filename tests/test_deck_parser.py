@@ -1,3 +1,5 @@
+import pytest
+
 from lib.deck_parser import parse, unique_names
 
 
@@ -157,3 +159,39 @@ def test_decks_without_commander_have_empty_commander_and_companion():
 def test_unique_names_includes_commander_and_companion():
     text = "Commander\n1 Vessra, Tide Regent\nCompanion\n1 Mossback Warden\nDeck\n1 Island"
     assert unique_names(parse(text)) == ["Island", "Mossback Warden", "Vessra, Tide Regent"]
+
+
+def _only_name(line):
+    return parse(line)["main"][0]["name"]
+
+
+@pytest.mark.parametrize("line", [
+    "4 Grumbling Toad (ABC) 123",
+    "4 Grumbling Toad (ABC) 276p",
+    "4 Grumbling Toad (ABC) 12a",
+    "4 Grumbling Toad (ABC) 12★",
+    "4 Grumbling Toad (PLST) 12",
+    "4 Grumbling Toad (PLSTX) 12",
+    "4 Grumbling Toad (PLST) ABC-123",
+    "4 Grumbling Toad (PLST) ABC-123a",
+    "4x Grumbling Toad (ABC) 276p",
+])
+def test_strips_set_and_collector_number_variants(line):
+    assert _only_name(line) == "Grumbling Toad"
+
+
+@pytest.mark.parametrize("name", [
+    "Grumbling Toad (Prime)",
+    # Intentional choice: Arena exports uppercase set codes, so a lowercase "(abc)" is
+    # treated as part of the name rather than a set code.
+    "Grumbling Toad (abc) 12",
+    "Grumbling Toad 2",
+    "Grumbling Toad (ABC)",
+])
+def test_keeps_parentheses_and_digits_that_are_not_a_set_suffix(name):
+    assert _only_name(f"1 {name}") == name
+
+
+def test_keeps_arena_rebalanced_prefix():
+    # Scryfall names rebalanced cards with the "A-" prefix, so it must survive parsing.
+    assert _only_name("2 A-Grumbling Toad (ABC) 12") == "A-Grumbling Toad"
