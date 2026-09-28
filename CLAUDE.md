@@ -4,6 +4,8 @@
 
 > **Card content is IP.** No real card names, rules text or Scryfall ids in any tracked file except this one: use invented cards in tests, fixtures, docstrings and examples. `scripts/check_ip.py` enforces it via a pre-commit hook; enable it once per clone with `git config core.hooksPath .githooks`. Names that are also plain words go in `lib/ip_allowlist.txt`. Cost and accuracy numbers: `docs/benchmarks.md`.
 
+> **Agent workflow:** for a bug or small feature, spawn the `developer` subagent (Sonnet) with the task definition, then the `code-reviewer` subagent with the same task definition and not the developer's reasoning. Commit only after the review passes. Shared rules for both live in `docs/agent-rules.md`: add new project rules there.
+
 Agentic system for analyzing Magic: The Gathering decks. Uses Scryfall as the card data source and a local JSON Lines cache to avoid redundant API calls.
 
 ## Quick Start
@@ -83,4 +85,6 @@ data/card_names.json        Scryfall name catalog for the IP check (30-day refre
 tests/fixtures/scryfall/    invented cards in Scryfall's JSON shape
 decks/                      your deck list files
 .claude/commands/           Claude Code skills
+.claude/agents/             developer + code-reviewer subagents
+docs/agent-rules.md         rules both subagents follow / check
 ```

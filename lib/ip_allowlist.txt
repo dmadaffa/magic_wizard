@@ -35,3 +35,7 @@ Hall
 Find
 Python
 Catalog
+Give
+Never
+Remove
+Why
