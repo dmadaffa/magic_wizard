@@ -23,6 +23,7 @@ To add a rule, append a section here. Keep each rule short and say why it exists
 - Scryfall fixtures go in `tests/fixtures/scryfall/`: Scryfall's real JSON shape, invented content. Don't hand-write the structure; base it on a real API response, then anonymise.
 - Test behaviour through public functions (`parse`, `Card.from_scryfall`, CLI output), not private helpers or internal state.
 - Mock only at the system boundary (HTTP calls to Scryfall, the clock). Never mock the code under test.
+- Cases that differ only in their data go in one `@pytest.mark.parametrize` test, not a loop or several copy-pasted tests. A loop stops at the first failure and hides the rest; parametrized cases each pass or fail on their own.
 
 ## Git
 
