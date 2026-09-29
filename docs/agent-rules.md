@@ -40,3 +40,4 @@ To add a rule, append a section here. Keep each rule short and say why it exists
 - Match the surrounding style: naming, comment density, idioms.
 - Only change what the task needs. If you notice other problems, list them in your report; don't fix them.
 - Keep `CLAUDE.md`, `.claude/commands/*.md` and docstrings in sync when behaviour or output shape changes.
+- Edit files with the Edit/Write tools, not `sed`, heredocs or inline `python -c`, whenever the text contains `\n`, quotes, `*`, `†` or other non-ASCII. Shell escaping has turned a `\n` inside a test string into a real line break and corrupted test files more than once. Shell edits are fine for simple ASCII substitutions; check the result with `git diff` either way.
