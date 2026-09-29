@@ -67,6 +67,53 @@ def test_format_not_detected_from_comment_after_cards_start():
     assert deck["format"] is None
 
 
+@pytest.mark.parametrize("text", [
+    "// Premodern Zorbling\n4 Emberquill Volley",
+    "// Nonstandard Tribal\n4 Emberquill Volley",
+    "// Modernized Zorbling\n4 Emberquill Volley",
+    "// Pre-Modern Zorbling\n4 Emberquill Volley",
+    "// Non-Standard Tribal\n4 Emberquill Volley",
+], ids=["premodern", "nonstandard", "modernized", "pre-modern", "non-standard"])
+def test_format_requires_whole_word_match(text):  # reproduces
+    assert parse(text)["format"] is None
+
+
+def test_format_followed_by_hyphen_still_matches():  # guard: rejecting hyphens after the format too
+    assert parse("// Pauper-legal Zorbling\n4 Emberquill Volley")["format"] == "Pauper"
+
+
+@pytest.mark.parametrize("text, expected", [
+    ("standard Deck\n4 Emberquill Volley", "Standard"),
+    ("Deck\n// Pioneer\n4 Emberquill Volley", "Pioneer"),
+    ("Deck\n\n// Pioneer\n4 Emberquill Volley", "Pioneer"),
+    ("// Izzet Delver\nModern Deck\n4 Emberquill Volley", "Modern"),
+], ids=["plain-header", "comment-after-deck-header", "blank-between-header-lines", "later-header-line"])
+def test_format_detected_from_plain_header_line(text, expected):  # reproduces
+    assert parse(text)["format"] == expected
+
+
+@pytest.mark.parametrize("text, expected", [
+    ("// Modern or Legacy\n4 Emberquill Volley", "Modern"),
+    ("// Legacy or Modern\n4 Emberquill Volley", "Legacy"),
+    ("// Legacy\n// Modern\n4 Emberquill Volley", "Legacy"),
+], ids=["first-in-line", "first-in-line-swapped", "first-line-wins"])
+def test_format_first_in_header_text_wins(text, expected):  # decision: earliest format in text wins
+    assert parse(text)["format"] == expected
+
+
+def test_bare_section_header_does_not_set_format():  # guard: running the format regex on bare header lines
+    deck = parse("Commander\n1 Zorbling Prime\n\nDeck\n4 Emberquill Volley")
+    assert deck["format"] is None
+
+
+@pytest.mark.parametrize("text, expected", [
+    ("Commander\n// Pioneer\n1 Zorbling Prime", "Pioneer"),
+    ("COMMANDER\n// Legacy\n4 Emberquill Volley", "Legacy"),
+], ids=["header-then-title", "case-insensitive"])
+def test_bare_section_header_does_not_stop_header_scan(text, expected):  # decision: bare headers are skipped, scan continues
+    assert parse(text)["format"] == expected
+
+
 def test_unique_names_deduplicates_across_main_and_side():
     text = "4 Emberquill Volley\n2 Emberquill Volley\n// Sideboard\n2 Emberquill Volley"
     names = unique_names(parse(text))

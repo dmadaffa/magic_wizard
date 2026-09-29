@@ -24,7 +24,7 @@ Read the JSON output. It contains:
 - `side` — list of `{qty, name}` for sideboard cards
 - `commander` — list of `{qty, name}` for the commander(s), empty if none
 - `companion` — list of `{qty, name}` for the companion, empty if none (Arena also lists it in `side`)
-- `format` — format name extracted from the deck's title comment, or `null`
+- `format` — format name extracted from the header lines before the first card (comment or plain line, whole word, first mention wins), or `null`
 
 **Active format**: use the explicit format argument if one was provided; otherwise fall back to the `format` field from the JSON; otherwise treat as unknown.
 

@@ -31,6 +31,8 @@ Create a `.txt` file in `decks/` using standard MTGO/Arena format:
 
 Supported sideboard separators: `// Sideboard`, a `Sideboard` line, or an `SB:` prefix. Arena section headers (`Commander`, `Companion`, `Deck`, `Sideboard`) are recognized. A blank line starts the sideboard only when the file has none of these markers; otherwise blank lines just group cards.
 
+The format is read from the header lines before the first card: a comment like `// Modern Zorbling Tempo` or a plain line like `Standard Deck`. Matching is case-insensitive and whole-word (`Premodern` and `Pre-Modern` are not `Modern`; `Pauper-legal` is `Pauper`), and the first format mentioned wins. Bare Arena section headers (`Commander`, `Deck`, ...) don't set a format; for those exports pass the format to `/analyze-deck` (e.g. `/analyze-deck decks/my_deck.txt Pioneer`).
+
 ## How It Works
 
 1. `lib/deck_parser.py` — parses the deck list text

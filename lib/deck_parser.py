@@ -14,6 +14,7 @@ SECTION_HEADERS = {
     "sb": "side",
 }
 KNOWN_FORMATS = {"standard", "pioneer", "modern", "legacy", "vintage", "commander", "pauper", "historic", "explorer", "alchemy"}
+_FORMAT_RE = re.compile(r"(?<![\w-])(" + "|".join(sorted(KNOWN_FORMATS)) + r")(?!\w)", re.IGNORECASE)
 COMMENT_RE = re.compile(r"^//")
 CARD_LINE_RE = re.compile(r"^(\d+)x?\s+(.+)$")
 # Strips Arena/MTGO set-code suffix: "Card Name (SET) 123" → "Card Name".
@@ -22,17 +23,25 @@ _ARENA_SUFFIX_RE = re.compile(r"\s+\([A-Z0-9]+\)\s+(?:[A-Z0-9]+-)?\d+[A-Za-z★]
 
 
 def _extract_format(text: str) -> str | None:
-    """Return the first known format name found in leading comment lines, or None."""
+    """Return the known format named in the header lines, or None.
+
+    The header is every line before the first card line (comments and plain
+    lines like "Standard Deck"). Matching is case-insensitive and whole-word; a leading hyphen joins
+    words ("Pre-Modern" is not Modern), a trailing one doesn't ("Pauper-legal").
+    The first header line naming a format wins; within it, the format that
+    appears first in the line wins. A bare section header (`Commander`, `Deck`,
+    ...) is skipped: it names a section, not a format. A line that merely
+    contains one, like "Deck standard", still counts.
+    """
     for raw in text.splitlines():
         line = raw.strip()
-        if not line:
-            continue
-        if not COMMENT_RE.match(line):
+        if CARD_LINE_RE.match(line) or line.upper().startswith("SB:"):
             break
-        lower = line.lower()
-        for fmt in KNOWN_FORMATS:
-            if fmt in lower:
-                return fmt.title()
+        if line.lower() in SECTION_HEADERS:
+            continue
+        m = _FORMAT_RE.search(line)
+        if m:
+            return m.group(1).title()
     return None
 
 
