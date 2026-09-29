@@ -227,6 +227,36 @@ def test_strips_set_and_collector_number_variants(line):
     assert _only_name(line) == "Grumbling Toad"
 
 
+@pytest.mark.parametrize("line", [
+    "4 Grumbling Toad (ABC) 12†",
+    "4 Grumbling Toad (ABC) 12 *F*",
+    "4 Grumbling Toad (ABC) 12 *E*",
+    "1 Grumbling Toad (ABC) S1",
+    "1 Grumbling Toad (ABC) A12",
+    "1 Grumbling Toad (ABC) A12 *F*",
+    "1 Grumbling Toad (ABC) 276p *F*",
+    "1 Grumbling Toad (ABC) 12★ *F*",
+    "1 Grumbling Toad (PLST) ABC-123 *F*",
+], ids=["dagger", "foil", "etched", "letter-prefix-s", "letter-prefix-a",
+        "letter-prefix-foil", "letter-suffix-foil", "star-foil", "set-dash-foil"])
+def test_strips_more_collector_number_forms(line):  # reproduces
+    assert _only_name(line) == "Grumbling Toad"
+
+
+@pytest.mark.parametrize("name", [
+    "Grumbling Toad S1",
+    "Grumbling Toad A12",
+    "Grumbling Toad 12†",
+    "Grumbling Toad 12 *F*",
+])
+def test_keeps_name_tail_without_set_group(name):  # guard: loosened regex stripping tokens with no (SET) group
+    assert _only_name(f"1 {name}") == name
+
+
+def test_keeps_set_group_followed_by_token_without_digit():  # guard: collector number made digit-optional or any token
+    assert _only_name("1 Grumbling Toad (ABC) S") == "Grumbling Toad (ABC) S"
+
+
 @pytest.mark.parametrize("name", [
     "Grumbling Toad (Prime)",
     # Intentional choice: Arena exports uppercase set codes, so a lowercase "(abc)" is

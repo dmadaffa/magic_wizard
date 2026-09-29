@@ -18,8 +18,12 @@ _FORMAT_RE = re.compile(r"(?<![\w-])(" + "|".join(sorted(KNOWN_FORMATS)) + r")(?
 COMMENT_RE = re.compile(r"^//")
 CARD_LINE_RE = re.compile(r"^(\d+)x?\s+(.+)$")
 # Strips Arena/MTGO set-code suffix: "Card Name (SET) 123" → "Card Name".
-# Collector numbers: 123, 276p, 12★, or SET-123 style (ABC-123).
-_ARENA_SUFFIX_RE = re.compile(r"\s+\([A-Z0-9]+\)\s+(?:[A-Z0-9]+-)?\d+[A-Za-z★]*$")
+# Collector numbers: 123, 276p, 12★, 12†, S1 / A12 (letter prefix), or SET-123 style
+# (ABC-123), optionally followed by a Moxfield foil marker (*F*, *E*).
+# The "(SET)" group is required, so name tails like "Name S1" are kept.
+_ARENA_SUFFIX_RE = re.compile(
+    r"\s+\([A-Z0-9]+\)\s+(?:[A-Z0-9]+-)?[A-Za-z]*\d+[A-Za-z★†]*(?:\s+\*[A-Z]\*)?$"
+)
 
 
 def _extract_format(text: str) -> str | None:
