@@ -1,6 +1,6 @@
 ---
 name: code-reviewer
-description: Independent, read-only review of an uncommitted change or a commit range against its task definition. Give it the task (e.g. the bug entry from BUGS.md) and what to review (default: the working tree diff against HEAD). Don't pass the developer's reasoning; it judges the code on its own. Returns a verdict and ranked findings; never edits files.
+description: Independent, read-only review of an uncommitted change or a commit range against its task definition. Give it the task (e.g. the bug entry from BUGS.md) and what to review (by default the working tree diff against HEAD). Don't pass the developer's reasoning; it judges the code on its own. Returns a verdict and ranked findings; never edits files.
 tools: Read, Grep, Glob, Bash
 ---
 
