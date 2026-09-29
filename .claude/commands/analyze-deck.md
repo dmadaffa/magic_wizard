@@ -15,18 +15,18 @@ Split `$ARGUMENTS` into the **file path** (first token) and an optional **format
 ### Step 1 — Parse the deck list and determine format
 Run:
 ```
-uv run python lib/deck_parser.py <file-path>
+uv run python lib/deck_parser.py <file-path> ["<format>"]
 ```
-(Pass only the file path, not the format, to the script.)
+Pass the format only if the user provided one, with all remaining tokens as one quoted argument (e.g. `"Pauper Commander"`). It overrides the format found in the file header. Without it, omit the argument.
 
-Read the JSON output. It contains:
+stdout is the JSON document (the script prints a human-readable summary to stderr; ignore it). Read the JSON. It contains:
 - `main` — list of `{qty, name}` for main deck cards
 - `side` — list of `{qty, name}` for sideboard cards
 - `commander` — list of `{qty, name}` for the commander(s), empty if none
 - `companion` — list of `{qty, name}` for the companion, empty if none (Arena also lists it in `side`)
-- `format` — format name extracted from the header lines before the first card (comment or plain line, whole word, first mention wins), or `null`
+- `format` — the active format: the format argument if one was passed, otherwise the format from the header lines before the first card (comment or plain line, whole word, first mention wins), or `null` (unknown)
 
-**Active format**: use the explicit format argument if one was provided; otherwise fall back to the `format` field from the JSON; otherwise treat as unknown.
+**Active format**: the `format` field of the JSON, nothing else. `null` means unknown.
 
 ### Step 2 — Populate the card cache
 Extract all unique card names from `commander`, `companion`, `main` and `side`.

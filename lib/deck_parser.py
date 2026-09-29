@@ -114,20 +114,24 @@ def unique_names(deck: dict) -> list[str]:
 
 
 if __name__ == "__main__":
+    # Usage: deck_parser.py [path] [format words...]
+    # stdout: the deck as JSON only. stderr: human-readable summary.
     import json
     path = sys.argv[1] if len(sys.argv) > 1 else "decks/example_deck.txt"
-    # Optional second arg overrides the format detected from the file header
-    format_override = sys.argv[2] if len(sys.argv) > 2 else None
+    # Optional remaining args override the format detected from the file header
+    # (joined, so an unquoted multi-word format still works)
+    format_override = " ".join(sys.argv[2:]) or None
     with open(path, encoding="utf-8") as f:
         deck = parse(f.read())
     if format_override:
         deck["format"] = format_override.title()
     main_count = sum(e["qty"] for e in deck["main"])
     side_count = sum(e["qty"] for e in deck["side"])
-    print(f"Main deck: {main_count} cards ({len(deck['main'])} unique)")
-    print(f"Sideboard: {side_count} cards ({len(deck['side'])} unique)")
+    # Summary goes to stderr so stdout is exactly the JSON document.
+    print(f"Main deck: {main_count} cards ({len(deck['main'])} unique)", file=sys.stderr)
+    print(f"Sideboard: {side_count} cards ({len(deck['side'])} unique)", file=sys.stderr)
     for section in ("commander", "companion"):
         if deck[section]:
-            print(f"{section.title()}: {', '.join(e['name'] for e in deck[section])}")
-    print(f"Format: {deck['format'] or 'unknown'}")
+            print(f"{section.title()}: {', '.join(e['name'] for e in deck[section])}", file=sys.stderr)
+    print(f"Format: {deck['format'] or 'unknown'}", file=sys.stderr)
     print(json.dumps(deck, indent=2))
