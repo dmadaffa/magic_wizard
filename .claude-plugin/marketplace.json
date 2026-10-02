@@ -1,0 +1,14 @@
+{
+  "name": "magic-wizard",
+  "owner": {
+    "name": "Daniele Madaffari"
+  },
+  "description": "Local marketplace for plugins developed in this repository.",
+  "plugins": [
+    {
+      "name": "loopwright",
+      "source": "./loopwright",
+      "description": "A developer and a code-reviewer subagent for test-first, reviewed, uncommitted changes."
+    }
+  ]
+}

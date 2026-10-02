@@ -1,0 +1,6 @@
+{
+  "extraKnownMarketplaces": {
+    "magic-wizard": { "source": { "source": "directory", "path": "./" } }
+  },
+  "enabledPlugins": { "loopwright@magic-wizard": true }
+}
