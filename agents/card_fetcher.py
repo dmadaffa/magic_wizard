@@ -40,7 +40,7 @@ def main(names: list[str], cache: CardCache | None = None) -> int:
             fetched.append(name)
         except CardNotFoundError:
             errors.append(name)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001 - one bad card must not abort the batch
             print(f"  ERROR fetching {name!r}: {exc}", file=sys.stderr)
             errors.append(name)
 

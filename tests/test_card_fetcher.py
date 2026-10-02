@@ -1,8 +1,8 @@
-from unittest.mock import patch, Mock
-import pytest
+from unittest.mock import patch
+
+from agents.card_fetcher import main
 from lib.cache import CardCache
 from lib.scryfall import CardNotFoundError
-from agents.card_fetcher import main
 
 _FAKE_CARD = {
     "name": "Cinder Dart",

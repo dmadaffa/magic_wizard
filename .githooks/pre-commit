@@ -1,4 +1,15 @@
 #!/bin/sh
-# Block commits that add real Magic card names (see CLAUDE.md, "Card content is IP").
+# Block commits that add real Magic card names (see CLAUDE.md, "Card content is IP")
+# or that fail `ruff check` on staged .py files. Both checks always run.
 # Enable once per clone: git config core.hooksPath .githooks
-exec python -m uv run python scripts/check_ip.py --staged
+# Known limit: ruff reads the working-tree copy of a file, not the staged one.
+status=0
+
+python -m uv run python scripts/check_ip.py --staged || status=1
+
+# NUL-separated so spaces, globs and quoted non-ASCII names survive; -r skips ruff
+# when no .py file is staged.
+git diff --cached -z --name-only --diff-filter=ACM -- '*.py' \
+    | xargs -0 -r python -m uv run ruff check || status=1
+
+exit $status

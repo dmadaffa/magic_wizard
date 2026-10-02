@@ -1,6 +1,6 @@
+from agents.card_view import main
 from lib.cache import CardCache
 from lib.scryfall import trim_card
-from agents.card_view import main
 
 
 def _cache_with(tmp_path, scryfall, **cards):

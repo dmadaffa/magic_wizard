@@ -1,4 +1,3 @@
-import pytest
 from lib.cache import CardCache
 from tests.conftest import load_scryfall
 

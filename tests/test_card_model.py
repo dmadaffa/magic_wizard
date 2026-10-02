@@ -1,7 +1,15 @@
 import pytest
+
 from lib.card_model import (
-    CAST, DISTURB, FLIP, MELD, PREPARED, TRANSFORM, UNKNOWN,
-    from_scryfall, mana_value,
+    CAST,
+    DISTURB,
+    FLIP,
+    MELD,
+    PREPARED,
+    TRANSFORM,
+    UNKNOWN,
+    from_scryfall,
+    mana_value,
 )
 from lib.scryfall import trim_card
 

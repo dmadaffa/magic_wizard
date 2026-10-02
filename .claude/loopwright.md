@@ -17,7 +17,7 @@ The only contract between this project and the `loopwright` plugin (`loopwright/
 ## Check commands
 
 - IP check: `python -m uv run python scripts/check_ip.py`. Every file you touched must have zero hits.
-- ruff: to be added here once task #22 is done.
+- ruff: `python -m uv run ruff check .`. Every file you touched must have zero hits.
 
 ## Trailer for commit messages
 

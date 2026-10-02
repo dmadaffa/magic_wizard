@@ -8,7 +8,7 @@ CardCache interface, then change the import in agents/card_fetcher.py and agents
 """
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 CACHE_PATH = Path(__file__).parent.parent / "data" / "card_cache.jsonl"
@@ -37,9 +37,8 @@ class CardCache:
         store = self._load()
         store[name] = {
             "name": name,
-            "fetched_at": datetime.now(timezone.utc).isoformat(),
+            "fetched_at": datetime.now(UTC).isoformat(),
             "scryfall": card,
         }
         with open(self._path, "w", encoding="utf-8", newline="\n") as f:
-            for entry in store.values():
-                f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+            f.writelines(json.dumps(entry, ensure_ascii=False) + "\n" for entry in store.values())

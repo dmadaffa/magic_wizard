@@ -1,8 +1,9 @@
-from unittest.mock import patch, Mock, call
+from unittest.mock import Mock, patch
+
 import pytest
 import requests
-from lib.scryfall import fetch_card, CardNotFoundError, _MAX_RETRIES
 
+from lib.scryfall import _MAX_RETRIES, CardNotFoundError, fetch_card
 from tests.conftest import load_scryfall
 
 _INSTANT_JSON = load_scryfall("instant")
@@ -49,9 +50,11 @@ def test_faces_and_related_parts_are_kept(scryfall):
 
 
 def test_raises_card_not_found_on_404():
-    with patch("lib.scryfall.requests.get", return_value=_not_found()):
-        with pytest.raises(CardNotFoundError):
-            fetch_card("Fake Card That Does Not Exist")
+    with (
+        patch("lib.scryfall.requests.get", return_value=_not_found()),
+        pytest.raises(CardNotFoundError),
+    ):
+        fetch_card("Fake Card That Does Not Exist")
 
 
 def _rate_limited():
@@ -76,9 +79,8 @@ def test_retries_exhaust_max_retries_then_raises():
     last.raise_for_status.side_effect = requests.HTTPError("429")
     responses = rate_limited_responses[:-1] + [last]
     with patch("lib.scryfall.requests.get", side_effect=responses), \
-         patch("lib.scryfall.time.sleep"):
-        with pytest.raises(requests.HTTPError):
-            fetch_card("Ember Sting")
+         patch("lib.scryfall.time.sleep"), pytest.raises(requests.HTTPError):
+        fetch_card("Ember Sting")
 
 
 def test_sleeps_between_every_request():

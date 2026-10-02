@@ -1,6 +1,7 @@
 """Thin Scryfall API client — returns card objects trimmed of images, prices and links."""
 
 import time
+
 import requests
 
 BASE_URL = "https://api.scryfall.com"

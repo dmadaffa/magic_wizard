@@ -66,7 +66,7 @@ def load_names(
             names = fetch()
             names_path.parent.mkdir(parents=True, exist_ok=True)
             names_path.write_text(json.dumps(names, ensure_ascii=False), encoding="utf-8")
-        except Exception as e:  # offline, Scryfall down, ...
+        except Exception as e:  # noqa: BLE001 - offline, Scryfall down, ... (never block)
             print(f"[ip-check] could not download card names ({e})", file=sys.stderr)
     if names_path.exists():
         return _expand(json.loads(names_path.read_text(encoding="utf-8")))
