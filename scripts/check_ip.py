@@ -1,7 +1,7 @@
-"""Fail if tracked files contain real Magic card names.
+"""Fail if repo files contain real Magic card names.
 
 Usage:
-    uv run python scripts/check_ip.py            # all tracked files
+    uv run python scripts/check_ip.py            # all tracked and untracked, non-ignored files
     uv run python scripts/check_ip.py --staged   # staged changes (pre-commit hook)
     uv run python scripts/check_ip.py --refresh  # re-download the name catalog first
 

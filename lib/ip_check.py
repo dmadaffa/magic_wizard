@@ -1,4 +1,4 @@
-"""Find real Magic card names in tracked files (card content is third-party IP).
+"""Find real Magic card names in repo files (card content is third-party IP).
 
 The name list is Scryfall's /catalog/card-names, saved to data/card_names.json
 (git-ignored) and refreshed when older than NAMES_MAX_AGE. Offline, it falls back
@@ -101,11 +101,12 @@ def _git(*args: str) -> str:
 
 
 def tracked_files(staged: bool) -> list[tuple[str, str]]:
-    """(path, content) for tracked files, or for the staged version of changed files."""
+    """(path, content) for tracked and untracked, non-ignored files, or for the staged
+    version of changed files."""
     if staged:
         paths = _git("diff", "--cached", "--name-only", "--diff-filter=ACMR").splitlines()
     else:
-        paths = _git("ls-files").splitlines()
+        paths = _git("ls-files", "--cached", "--others", "--exclude-standard").splitlines()
     out = []
     for path in paths:
         if path in EXEMPT_FILES:

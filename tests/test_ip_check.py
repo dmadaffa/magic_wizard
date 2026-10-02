@@ -1,7 +1,9 @@
 import json
 import os
+import subprocess
 import time
 
+from lib import ip_check
 from lib.ip_check import check, find_names, load_allowlist, load_names
 
 # Invented names standing in for the Scryfall catalog.
@@ -73,6 +75,37 @@ def test_stale_catalog_is_refreshed(tmp_path):
     old = time.time() - 31 * 24 * 3600
     os.utime(names_path, (old, old))
     assert "Vexmoor Hound" in load_names(names_path=names_path, fetch=lambda: _CATALOG)
+
+
+def _repo(tmp_path, monkeypatch):
+    """A temp git repo with one committed clean file; lib.ip_check is pointed at it."""
+    def git(*args):
+        subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@t", *args],
+                       cwd=tmp_path, check=True, capture_output=True)
+    git("init")
+    (tmp_path / "clean.txt").write_text("nothing here\n", encoding="utf-8")
+    git("add", "clean.txt")
+    git("commit", "-m", "init")
+    monkeypatch.setattr(ip_check, "ROOT", tmp_path)
+    return tmp_path
+
+
+def test_whole_repo_check_reads_untracked_files(tmp_path, monkeypatch):
+    repo = _repo(tmp_path, monkeypatch)
+    (repo / "new.py").write_text("x = 'Thornquill'\n", encoding="utf-8")
+    files = ip_check.tracked_files(staged=False)
+    assert ("new.py", "x = 'Thornquill'\n") in files
+    assert check(files, _NAMES, set()) == [("new.py", 1, "Thornquill")]
+
+
+def test_whole_repo_check_skips_git_ignored_files(tmp_path, monkeypatch):
+    repo = _repo(tmp_path, monkeypatch)
+    (repo / ".gitignore").write_text("secret/\n", encoding="utf-8")
+    (repo / "secret").mkdir()
+    (repo / "secret" / "deck.txt").write_text("4 Thornquill\n", encoding="utf-8")
+    paths = [p for p, _ in ip_check.tracked_files(staged=False)]
+    assert "secret/deck.txt" not in paths
+    assert "clean.txt" in paths
 
 
 def test_offline_without_catalog_falls_back_to_card_cache(tmp_path, capsys):

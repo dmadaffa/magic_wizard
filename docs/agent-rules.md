@@ -14,7 +14,6 @@ To add a project rule, append a section here. Keep each rule short and say why i
 - No real Magic card names, rules text or Scryfall ids in any tracked file except `CLAUDE.md`. Use invented cards in tests, fixtures, docstrings, comments and examples.
 - The pre-commit hook (`scripts/check_ip.py --staged`) scans **every staged file in full**, not only the changed lines. A file you touch must be completely clean, even lines you did not write. If a file you need to edit already contains real names, report it rather than working around the hook.
 - Invented names can collide with real cards, even single words. Check new names before you use them: `python -m uv run python scripts/check_ip.py` (whole repo) must not report them.
-- That whole-repo check only scans files git knows about, so a new untracked file reports 0 hits without being read. Run `git add -N <new files>` first (intent-to-add; it stages no content), then the check.
 - Words that are both card names and plain words go in `lib/ip_allowlist.txt`. Only add ordinary words, never a distinctive name.
 - `data/`, `decks/` and `tasks/` are git-ignored. You may read them locally; never quote their card content into tracked files.
 
