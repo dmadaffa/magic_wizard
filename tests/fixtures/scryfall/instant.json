@@ -11,24 +11,24 @@
   "name": "Ember Sting",
   "lang": "en",
   "released_at": "2026-01-01",
-  "uri": "https://api.example.invalid/spark-jolt/uri",
-  "scryfall_uri": "https://api.example.invalid/spark-jolt/scryfall_uri",
+  "uri": "https://api.example.invalid/ember-sting/uri",
+  "scryfall_uri": "https://api.example.invalid/ember-sting/scryfall_uri",
   "layout": "normal",
   "highres_image": true,
   "image_status": "highres_scan",
   "image_updated_at": "2026-01-01T00:00:00Z",
   "image_uris": {
-    "small": "https://img.example.invalid/spark-jolt/small",
-    "normal": "https://img.example.invalid/spark-jolt/normal",
-    "large": "https://img.example.invalid/spark-jolt/large",
-    "png": "https://img.example.invalid/spark-jolt/png",
-    "art_crop": "https://img.example.invalid/spark-jolt/art_crop",
-    "border_crop": "https://img.example.invalid/spark-jolt/border_crop",
-    "thumb": "https://img.example.invalid/spark-jolt/thumb",
-    "grid": "https://img.example.invalid/spark-jolt/grid",
-    "display": "https://img.example.invalid/spark-jolt/display",
-    "art": "https://img.example.invalid/spark-jolt/art",
-    "crop": "https://img.example.invalid/spark-jolt/crop"
+    "small": "https://img.example.invalid/ember-sting/small",
+    "normal": "https://img.example.invalid/ember-sting/normal",
+    "large": "https://img.example.invalid/ember-sting/large",
+    "png": "https://img.example.invalid/ember-sting/png",
+    "art_crop": "https://img.example.invalid/ember-sting/art_crop",
+    "border_crop": "https://img.example.invalid/ember-sting/border_crop",
+    "thumb": "https://img.example.invalid/ember-sting/thumb",
+    "grid": "https://img.example.invalid/ember-sting/grid",
+    "display": "https://img.example.invalid/ember-sting/display",
+    "art": "https://img.example.invalid/ember-sting/art",
+    "crop": "https://img.example.invalid/ember-sting/crop"
   },
   "mana_cost": "{R}",
   "cmc": 1.0,
@@ -48,7 +48,7 @@
       "component": "combo_piece",
       "name": "Ember Sting",
       "type_line": "Instant",
-      "uri": "https://api.example.invalid/spark-jolt"
+      "uri": "https://api.example.invalid/ember-sting"
     },
     {
       "object": "related_card",
@@ -121,11 +121,11 @@
   "set": "tst",
   "set_name": "Test Set",
   "set_type": "commander",
-  "set_uri": "https://api.example.invalid/spark-jolt/set_uri",
-  "set_search_uri": "https://api.example.invalid/spark-jolt/set_search_uri",
-  "scryfall_set_uri": "https://api.example.invalid/spark-jolt/scryfall_set_uri",
-  "rulings_uri": "https://api.example.invalid/spark-jolt/rulings_uri",
-  "prints_search_uri": "https://api.example.invalid/spark-jolt/prints_search_uri",
+  "set_uri": "https://api.example.invalid/ember-sting/set_uri",
+  "set_search_uri": "https://api.example.invalid/ember-sting/set_search_uri",
+  "scryfall_set_uri": "https://api.example.invalid/ember-sting/scryfall_set_uri",
+  "rulings_uri": "https://api.example.invalid/ember-sting/rulings_uri",
+  "prints_search_uri": "https://api.example.invalid/ember-sting/prints_search_uri",
   "collector_number": "1",
   "digital": false,
   "rarity": "uncommon",
@@ -155,13 +155,13 @@
     "tix": null
   },
   "related_uris": {
-    "tcgplayer_infinite_articles": "https://img.example.invalid/spark-jolt/tcgplayer_infinite_articles",
-    "tcgplayer_infinite_decks": "https://img.example.invalid/spark-jolt/tcgplayer_infinite_decks",
-    "edhrec": "https://img.example.invalid/spark-jolt/edhrec"
+    "tcgplayer_infinite_articles": "https://img.example.invalid/ember-sting/tcgplayer_infinite_articles",
+    "tcgplayer_infinite_decks": "https://img.example.invalid/ember-sting/tcgplayer_infinite_decks",
+    "edhrec": "https://img.example.invalid/ember-sting/edhrec"
   },
   "purchase_uris": {
-    "tcgplayer": "https://img.example.invalid/spark-jolt/tcgplayer",
-    "cardmarket": "https://img.example.invalid/spark-jolt/cardmarket",
-    "cardhoarder": "https://img.example.invalid/spark-jolt/cardhoarder"
+    "tcgplayer": "https://img.example.invalid/ember-sting/tcgplayer",
+    "cardmarket": "https://img.example.invalid/ember-sting/cardmarket",
+    "cardhoarder": "https://img.example.invalid/ember-sting/cardhoarder"
   }
 }

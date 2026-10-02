@@ -5,7 +5,7 @@ from lib.scryfall import fetch_card, CardNotFoundError, _MAX_RETRIES
 
 from tests.conftest import load_scryfall
 
-_BOLT_JSON = load_scryfall("instant")
+_INSTANT_JSON = load_scryfall("instant")
 
 
 def _ok(json_data):
@@ -61,7 +61,7 @@ def _rate_limited():
 
 
 def test_retries_on_429_then_succeeds():
-    responses = [_rate_limited(), _ok(_BOLT_JSON)]
+    responses = [_rate_limited(), _ok(_INSTANT_JSON)]
     with patch("lib.scryfall.requests.get", side_effect=responses) as mock_get, \
          patch("lib.scryfall.time.sleep"):
         result = fetch_card("Ember Sting")
@@ -82,7 +82,7 @@ def test_retries_exhaust_max_retries_then_raises():
 
 
 def test_sleeps_between_every_request():
-    with patch("lib.scryfall.requests.get", return_value=_ok(_BOLT_JSON)) as mock_get, \
+    with patch("lib.scryfall.requests.get", return_value=_ok(_INSTANT_JSON)) as mock_get, \
          patch("lib.scryfall.time.sleep") as mock_sleep:
         fetch_card("Ember Sting")
     # At minimum one rate-limit sleep must occur before the successful request
@@ -91,7 +91,7 @@ def test_sleeps_between_every_request():
 
 
 def test_backoff_increases_with_each_retry():
-    responses = [_rate_limited(), _rate_limited(), _ok(_BOLT_JSON)]
+    responses = [_rate_limited(), _rate_limited(), _ok(_INSTANT_JSON)]
     with patch("lib.scryfall.requests.get", side_effect=responses), \
          patch("lib.scryfall.time.sleep") as mock_sleep:
         fetch_card("Ember Sting")
