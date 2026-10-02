@@ -8,7 +8,7 @@
     {
       "name": "loopwright",
       "source": "./loopwright",
-      "description": "A developer and a code-reviewer subagent for test-first, reviewed, uncommitted changes."
+      "description": "A developer and a code-reviewer subagent for test-first, reviewed, uncommitted changes, plus task-work and task-new skills to run the task queue."
     }
   ]
 }

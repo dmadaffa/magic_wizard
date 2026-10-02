@@ -1,6 +1,6 @@
 # Magic Wizard — MTG Deck Assistant
 
-> **Tasks:** read `tasks/INDEX.md`, then only the task file you need. For each bug: write a failing test first (fixtures: Scryfall's real JSON shape, invented card content), then fix. Don't mark a bug done unless its test fails without the fix. Mark it done by setting `status: done`, moving the file to `tasks/done/` and regenerating the index with `python -m uv run python loopwright/scripts/index.py tasks/` (`--next-id` prints the next free id). `tasks/` is git-ignored.
+> **Tasks:** read `tasks/INDEX.md`, then only the task file you need. For each bug: write a failing test first (fixtures: Scryfall's real JSON shape, invented card content), then fix. Don't mark a bug done unless its test fails without the fix. Mark it done by setting `status: done`, moving the file to `tasks/done/` and regenerating the index with `python -m uv run python loopwright/scripts/index.py tasks/` (`--next-id` prints the next free id). `tasks/` is git-ignored. `/loopwright:task-work [id]` runs a task end to end (pick, developer, reviewer, commit, close); `/loopwright:task-new <description>` creates a task file and updates the index.
 
 > **Card content is IP.** No real card names, rules text or Scryfall ids in any tracked file except this one: use invented cards in tests, fixtures, docstrings and examples. `scripts/check_ip.py` enforces it via a pre-commit hook; enable it once per clone with `git config core.hooksPath .githooks`. Names that are also plain words go in `lib/ip_allowlist.txt`. Cost and accuracy numbers: `docs/benchmarks.md`.
 
@@ -93,6 +93,7 @@ decks/                      your deck list files
 docs/agent-rules.md         project rules the subagents follow / check
 loopwright/                 generic task-workflow plugin (built to be extracted); scripts/index.py builds tasks/INDEX.md, tests in loopwright/tests/
 loopwright/agents/          developer + code-reviewer subagents (loopwright:*)
+loopwright/skills/          task-work and task-new skills (/loopwright:task-work, /loopwright:task-new)
 loopwright/rules.md         generic rules both subagents follow / check
 tasks/                      task files by folder (bugs, features, unrefined, done) + generated INDEX.md; git-ignored
 ```
