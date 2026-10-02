@@ -13,5 +13,5 @@ decks/*
 !decks/.gitkeep
 inputs/
 
-# Local working notes
-BUGS.md
+# Local working notes (task notes mention real card names)
+tasks/

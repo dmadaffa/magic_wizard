@@ -15,7 +15,7 @@ To add a rule, append a section here. Keep each rule short and say why it exists
 - The pre-commit hook (`scripts/check_ip.py --staged`) scans **every staged file in full**, not only the changed lines. A file you touch must be completely clean, even lines you did not write. If a file you need to edit already contains real names, report it rather than working around the hook.
 - Invented names can collide with real cards, even single words. Check new names before you use them: `python -m uv run python scripts/check_ip.py` (whole repo) must not report them.
 - Words that are both card names and plain words go in `lib/ip_allowlist.txt`. Only add ordinary words, never a distinctive name.
-- `data/`, `decks/` and `BUGS.md` are git-ignored. You may read them locally; never quote their card content into tracked files.
+- `data/`, `decks/` and `tasks/` are git-ignored. You may read them locally; never quote their card content into tracked files.
 
 ## Tests
 
@@ -25,7 +25,7 @@ To add a rule, append a section here. Keep each rule short and say why it exists
   - **guard**: passes before and after. It protects existing behaviour against a realistic over-fix (e.g. a looser regex that would also strip parts of real names). Name the over-fix it catches.
   - **decision**: pins a choice the task left open (and may pass before). Name the choice.
   A test that passes before the fix and is none of these doesn't belong in the change.
-- Scryfall fixtures go in `tests/fixtures/scryfall/`: Scryfall's real JSON shape, invented content. Don't hand-write the structure; base it on a real API response, then anonymise.
+- Scryfall fixtures go in `tests/fixtures/scryfall/`: Scryfall's real JSON shape, invented content. Don't hand-write the structure; base it on a real API response (`curl "https://api.scryfall.com/cards/named?exact=<name>"`), then replace names, rules text, costs and ids with invented ones before committing. A hand-written double-faced-card fixture once hid a bug (`cmc` missing on faces) because the structure was wrong.
 - Test behaviour through public functions (`parse`, `Card.from_scryfall`, CLI output), not private helpers or internal state.
 - Mock only at the system boundary (HTTP calls to Scryfall, the clock). Never mock the code under test.
 - Cases that differ only in their data go in one `@pytest.mark.parametrize` test, not a loop or several copy-pasted tests. A loop stops at the first failure and hides the rest; parametrized cases each pass or fail on their own.

@@ -1,6 +1,6 @@
 # Magic Wizard — MTG Deck Assistant
 
-> **Open bug backlog:** see `BUGS.md` before starting new work. For each bug: write a failing test first (fixtures: Scryfall's real JSON shape, invented card content), then fix, then tick the box. Don't mark a bug done unless its test fails without the fix.
+> **Tasks:** read `tasks/INDEX.md`, then only the task file you need. For each bug: write a failing test first (fixtures: Scryfall's real JSON shape, invented card content), then fix. Don't mark a bug done unless its test fails without the fix. Mark it done by setting `status: done`, moving the file to `tasks/done/` and regenerating the index with `python -m uv run python loopwright/scripts/index.py tasks/` (`--next-id` prints the next free id). `tasks/` is git-ignored.
 
 > **Card content is IP.** No real card names, rules text or Scryfall ids in any tracked file except this one: use invented cards in tests, fixtures, docstrings and examples. `scripts/check_ip.py` enforces it via a pre-commit hook; enable it once per clone with `git config core.hooksPath .githooks`. Names that are also plain words go in `lib/ip_allowlist.txt`. Cost and accuracy numbers: `docs/benchmarks.md`.
 
@@ -89,4 +89,6 @@ decks/                      your deck list files
 .claude/commands/           Claude Code skills
 .claude/agents/             developer + code-reviewer subagents
 docs/agent-rules.md         rules both subagents follow / check
+loopwright/                 generic task-workflow plugin (built to be extracted); scripts/index.py builds tasks/INDEX.md, tests in loopwright/tests/
+tasks/                      task files by folder (bugs, features, unrefined, done) + generated INDEX.md; git-ignored
 ```
