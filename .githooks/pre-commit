@@ -9,7 +9,7 @@ python -m uv run python scripts/check_ip.py --staged || status=1
 
 # NUL-separated so spaces, globs and quoted non-ASCII names survive; -r skips ruff
 # when no .py file is staged.
-git diff --cached -z --name-only --diff-filter=ACM -- '*.py' \
+git diff --cached -z --name-only --diff-filter=ACMR -- '*.py' \
     | xargs -0 -r python -m uv run ruff check || status=1
 
 exit $status
