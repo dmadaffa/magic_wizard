@@ -102,3 +102,22 @@ def test_backoff_increases_with_each_retry():
     backoff_waits = [s for s in sleep_args if s >= 1.0]
     assert len(backoff_waits) == 2
     assert backoff_waits[1] > backoff_waits[0]
+
+
+def test_backoff_waits_are_1_2_4_8_16_seconds():
+    responses = [_rate_limited()] * _MAX_RETRIES + [_ok(_INSTANT_JSON)]
+    with patch("lib.scryfall.requests.get", side_effect=responses), \
+         patch("lib.scryfall.time.sleep") as mock_sleep:
+        fetch_card("Ember Sting")
+    backoff_waits = [c.args[0] for c in mock_sleep.call_args_list if c.args[0] >= 1.0]
+    assert backoff_waits == [1, 2, 4, 8, 16]
+
+
+def test_429_retry_message_goes_to_stderr(capsys):
+    responses = [_rate_limited(), _ok(_INSTANT_JSON)]
+    with patch("lib.scryfall.requests.get", side_effect=responses), \
+         patch("lib.scryfall.time.sleep"):
+        fetch_card("Ember Sting")
+    captured = capsys.readouterr()
+    assert "429" in captured.err
+    assert captured.out == ""

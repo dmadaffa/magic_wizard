@@ -1,5 +1,6 @@
 """Thin Scryfall API client — returns card objects trimmed of images, prices and links."""
 
+import sys
 import time
 
 import requests
@@ -28,7 +29,7 @@ _DROP_KEYS = frozenset({
 })
 
 _MAX_RETRIES = 5
-_BACKOFF_BASE = 2.0  # seconds; doubles each retry: 2, 4, 8, 16, 32
+_BACKOFF_BASE = 2.0  # seconds; waits are BASE ** attempt: 1, 2, 4, 8, 16
 
 
 class CardNotFoundError(Exception):
@@ -43,7 +44,11 @@ def _get_with_backoff(url: str, **kwargs) -> requests.Response:
         if resp.status_code != 429:
             return resp
         wait = _BACKOFF_BASE ** attempt
-        print(f"[scryfall] 429 rate-limited — retrying in {wait:.0f}s (attempt {attempt + 1}/{_MAX_RETRIES})")
+        print(
+            f"[scryfall] 429 rate-limited — retrying in {wait:.0f}s "
+            f"(attempt {attempt + 1}/{_MAX_RETRIES})",
+            file=sys.stderr,
+        )
         time.sleep(wait)
     # Final attempt after max retries
     time.sleep(_RATE_LIMIT_SLEEP)

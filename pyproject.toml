@@ -1,10 +1,9 @@
 [project]
 name = "magic-wizard"
 version = "0.1.0"
-description = "Add your description here"
+description = "Agentic Magic: The Gathering deck analysis with a cached Scryfall card store."
 requires-python = ">=3.12"
 dependencies = [
-    "anthropic>=0.107.1",
     "requests>=2.34.2",
 ]
 
