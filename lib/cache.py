@@ -8,6 +8,7 @@ CardCache interface, then change the import in agents/card_fetcher.py and agents
 """
 
 import json
+import os
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -40,5 +41,13 @@ class CardCache:
             "fetched_at": datetime.now(UTC).isoformat(),
             "scryfall": card,
         }
-        with open(self._path, "w", encoding="utf-8", newline="\n") as f:
-            f.writelines(json.dumps(entry, ensure_ascii=False) + "\n" for entry in store.values())
+        # Write a temp file next to the cache, then swap it in, so a failed
+        # write never leaves the cache truncated.
+        tmp_path = self._path.with_name(self._path.name + ".tmp")
+        try:
+            with open(tmp_path, "w", encoding="utf-8", newline="\n") as f:
+                f.writelines(json.dumps(entry, ensure_ascii=False) + "\n" for entry in store.values())
+            os.replace(tmp_path, self._path)
+        except BaseException:
+            tmp_path.unlink(missing_ok=True)
+            raise

@@ -1,3 +1,5 @@
+import pytest
+
 from lib.cache import CardCache
 from tests.conftest import load_scryfall
 
@@ -44,6 +46,22 @@ def test_cache_persists_across_instances(tmp_path):
     path = tmp_path / "cache.jsonl"
     CardCache(path).put("Ember Sting", _INSTANT)
     assert CardCache(path).get("Ember Sting") is not None
+
+
+def test_failed_put_leaves_cache_untouched(tmp_path):
+    path = tmp_path / "cache.jsonl"
+    cache = CardCache(path)
+    cache.put("Ember Sting", _INSTANT)
+    cache.put("Tidewatch Apprentice", _DFC)
+    before = path.read_bytes()
+
+    # A set is not JSON-serializable. The second card keeps its position, so
+    # the first line is written and then the write fails partway through.
+    with pytest.raises(TypeError):
+        cache.put("Tidewatch Apprentice", {**_DFC, "colors": {"U"}})
+
+    assert path.read_bytes() == before
+    assert [p.name for p in tmp_path.iterdir()] == ["cache.jsonl"]
 
 
 def test_multiple_cards_stored_independently(tmp_path):
