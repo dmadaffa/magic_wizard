@@ -3,7 +3,7 @@
 Usage:
     uv run python agents/card_fetcher.py "Cinder Dart" "Island" "Null Ripple"
 
-Checks the local CSV cache first; only calls Scryfall for cards not yet stored.
+Checks the local JSON Lines cache first; only calls Scryfall for cards not yet stored.
 Prints a summary of hits and fetches. Exit code 0 on success, 1 if any card
 could not be found.
 """
