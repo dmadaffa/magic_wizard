@@ -126,11 +126,14 @@ def test_no_open_tasks_still_writes_a_valid_index(tmp_path):
     assert "\n1\n" in read_index(tmp_path)
 
 
+# guard: /loopwright:init relies on an empty tasks dir giving a valid, empty index;
+# catches changing the empty Done line to blank or '-'.
 def test_empty_tasks_dir_writes_an_index(tmp_path):
     result = run_index(tmp_path)
 
     assert result.returncode == 0
     assert table_rows(read_index(tmp_path)) == []
+    assert "\n## Done\n\nnone\n" in read_index(tmp_path)
 
 
 def test_running_twice_gives_the_same_index(tmp_path):

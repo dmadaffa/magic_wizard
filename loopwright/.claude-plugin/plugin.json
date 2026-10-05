@@ -1,7 +1,7 @@
 {
   "name": "loopwright",
   "version": "0.1.0",
-  "description": "A developer and a code-reviewer subagent for test-first, reviewed, uncommitted changes, plus task-work and task-new skills to run the task queue. Project specifics come from .claude/loopwright.md.",
+  "description": "A developer and a code-reviewer subagent for test-first, reviewed, uncommitted changes, plus init, task-work and task-new skills to set up and run the task queue. Project specifics come from .claude/loopwright.md.",
   "author": {
     "name": "Daniele Madaffari"
   }

@@ -93,7 +93,8 @@ decks/                      your deck list files
 docs/agent-rules.md         project rules the subagents follow / check
 loopwright/                 generic task-workflow plugin (built to be extracted); scripts/index.py builds tasks/INDEX.md, tests in loopwright/tests/
 loopwright/agents/          developer + code-reviewer subagents (loopwright:*)
-loopwright/skills/          task-work and task-new skills (/loopwright:task-work, /loopwright:task-new)
+loopwright/skills/          init, task-work and task-new skills (/loopwright:init, /loopwright:task-work, /loopwright:task-new)
+loopwright/templates/       config template used by /loopwright:init
 loopwright/rules.md         generic rules both subagents follow / check
 tasks/                      task files by folder (bugs, features, unrefined, done) + generated INDEX.md; git-ignored
 ```
