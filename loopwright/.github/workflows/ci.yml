@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    name: tests and ruff (${{ matrix.os }}, Python ${{ matrix.python }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        # 3.10 is the floor (requires-python); 3.x is the latest stable.
+        python: ["3.10", "3.x"]
+    steps:
+      # The run_on_base.py tests build their own throwaway git repos and set
+      # their own git identity, so the default shallow checkout is enough.
+      - uses: actions/checkout@v4
+      # uv can't resolve a request like "3.x", so setup-python picks the
+      # interpreter and uv is told to use exactly that one (no download).
+      # `uv run` after `uv sync` reuses the synced .venv.
+      - uses: actions/setup-python@v5
+        id: py
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: astral-sh/setup-uv@v6
+      - name: Install dependencies
+        run: uv sync --python "${{ steps.py.outputs.python-path }}"
+      - name: Tests
+        run: uv run pytest -q
+      - name: Ruff
+        run: uv run ruff check .
+
+  validate:
+    name: plugin validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # Documented npm install; it requires Node.js 22 or later.
+      - run: npm install -g @anthropic-ai/claude-code
+      # Needs no credentials. In the plugin repo the plugin sits at the root.
+      - run: claude plugin validate --strict .
