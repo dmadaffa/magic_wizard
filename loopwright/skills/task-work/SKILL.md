@@ -55,6 +55,8 @@ Rules for the loop:
 - When you apply small review fixes yourself, check each new guard test by reintroducing the over-fix in a scratchpad copy and watching the test fail. Also check the edit actually applied: a silent no-op edit can make that check pass for the wrong reason.
 - If an agent type is missing or skipped, check its frontmatter first; a YAML error (for example `: ` inside an unquoted description) hides it.
 - Related-case coverage is a question for you as well as the reviewer: does the test fail without the fix, and does the fix cover the cases next to it?
+- After a change edits a skill or an agent definition, ask the user to run `/reload-plugins` (or start a new session) before you rely on the new text. Skills and agent definitions are read at session start, so the session keeps following the old text until a reload. Only the user can run it; agents cannot.
+- When the change edits the reviewer's own instructions or anything the reviewer runs, step 6 always includes a review by a fresh `code-reviewer`, added if the Done when doesn't ask for one. It runs after the reload, if the rule above applied, and gets only the standard brief of step 5 (task path, content and decisions; nothing about what changed). If it finds something, later rounds resume that fresh reviewer, not the step-5 one. An approving round can miss what a reviewer reading only the updated instructions finds, and a fresh run also shows that the updated instructions work on their own.
 
 ## 6. Run the orchestrator checks
 
