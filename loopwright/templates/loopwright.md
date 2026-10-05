@@ -20,6 +20,12 @@ The only contract between this project and the `loopwright` plugin. The `loopwri
 
 {{test_command}}
 
+## Test files command
+
+<!-- Optional. Runs only some test files, for the reviewer's base-revision check: the test command with a {files} placeholder and the runner's verbose flag, e.g. python -m pytest -v {files}. {files} must be an argument of its own, and paths in the command use forward slashes (it is split with POSIX shell rules). Write "none" to use the test command plus the file paths. -->
+
+{{test_files_command}}
+
 ## Check commands
 
 <!-- One bullet per check (linter, type checker, ...) the agents must run: a label, the command, and what counts as a pass. -->

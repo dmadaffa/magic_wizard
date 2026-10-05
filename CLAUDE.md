@@ -91,7 +91,7 @@ decks/                      your deck list files
 .claude/settings.json       enables the loopwright plugin via the local marketplace
 .claude-plugin/marketplace.json  local marketplace listing the loopwright plugin
 docs/agent-rules.md         project rules the subagents follow / check
-loopwright/                 generic task-workflow plugin (built to be extracted); scripts/index.py builds tasks/INDEX.md, tests in loopwright/tests/
+loopwright/                 generic task-workflow plugin (built to be extracted); scripts/index.py builds tasks/INDEX.md, scripts/run_on_base.py runs tests on the base revision for the reviewer, tests in loopwright/tests/
 loopwright/agents/          developer + code-reviewer subagents (loopwright:*)
 loopwright/skills/          init, task-work and task-new skills (/loopwright:init, /loopwright:task-work, /loopwright:task-new)
 loopwright/templates/       config template used by /loopwright:init

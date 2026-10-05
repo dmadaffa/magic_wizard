@@ -16,6 +16,7 @@ If `.claude/loopwright.md` exists, say so and stop. Never overwrite it, and chan
 Look at the project root for how tests and checks are run: `pyproject.toml`, `package.json`, `Makefile`, an existing CI workflow, or similar. Propose:
 
 - the test command;
+- the test files command: the test command with a `{files}` placeholder and the runner's verbose flag (e.g. `python -m uv run pytest -v {files}`), used by the reviewer to run some test files on the base revision. If you can't tell how the runner takes files and a verbose flag, propose `none` (the test command plus the file paths is used);
 - the check commands (linter, type checker, ...), each as a bullet ``- <label>: `<command>`. <criterion>``, with a pass criterion per check: "every file you touched must have zero hits" for linters and formatters that can be scoped to changed files, otherwise "exits 0".
 
 Only propose what the project already has. Never invent a test command or a check. If nothing is found, propose none, say so, and write `none` (without backticks) for that value.
@@ -26,7 +27,7 @@ If the tasks dir already exists and holds other files but none of `bugs/`, `feat
 
 ## 3. Confirm in one question
 
-Ask the user once, showing the proposed test command, check commands with their pass criteria, tasks dir, rules file and trailer, and asking them to confirm or correct any of them. In the same question ask whether the tasks dir should be git-ignored. Recommend tracked, unless the task notes will hold data that must not be published.
+Ask the user once, showing the proposed test command, test files command, check commands with their pass criteria, tasks dir, rules file and trailer, and asking them to confirm or correct any of them. In the same question ask whether the tasks dir should be git-ignored. Recommend tracked, unless the task notes will hold data that must not be published.
 
 ## 4. Write the files
 
@@ -42,7 +43,7 @@ Every step only creates what is missing, so an interrupted init can be rerun. `.
   ```
 
   If an `INDEX.md` already exists and doesn't start with `# Task index`, don't run it: say so and leave the file. If the script exits 1, an existing task file is invalid: show the error, leave the file for the user, and stop; rerun init once it is fixed.
-- Last, read `${CLAUDE_PLUGIN_ROOT}/templates/loopwright.md` and write it to `.claude/loopwright.md` (create `.claude/` if needed), replacing each `{{placeholder}}` with the confirmed value: `{{test_command}}` with the command in backticks (or `none`), `{{check_commands}}` with the bullets (or `none`), `{{trailer}}` with the trailer in backticks (or `none`), `{{notes}}` with `none`, and the path placeholders with the plain paths (the template already has the backticks). Keep the section labels and the comments.
+- Last, read `${CLAUDE_PLUGIN_ROOT}/templates/loopwright.md` and write it to `.claude/loopwright.md` (create `.claude/` if needed), replacing each `{{placeholder}}` with the confirmed value: `{{test_command}}` with the command in backticks (or `none`), `{{test_files_command}}` likewise, `{{check_commands}}` with the bullets (or `none`), `{{trailer}}` with the trailer in backticks (or `none`), `{{notes}}` with `none`, and the path placeholders with the plain paths (the template already has the backticks). Keep the section labels and the comments.
 
 ## 5. Tell the user
 

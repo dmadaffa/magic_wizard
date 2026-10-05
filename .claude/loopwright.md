@@ -14,6 +14,10 @@ The only contract between this project and the `loopwright` plugin (`loopwright/
 
 `python -m uv run pytest -q`
 
+## Test files command
+
+`python -m uv run pytest -v {files}`
+
 ## Check commands
 
 - IP check: `python -m uv run python scripts/check_ip.py`. Every file you touched must have zero hits.
