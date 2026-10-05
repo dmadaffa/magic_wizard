@@ -69,12 +69,12 @@ Gate: no blocking or should-fix finding remains, each one was either fixed or re
 - Message: first line `<title> (#id)`, then a short body, then a blank line, then the configured trailer.
 - Never use `--no-verify`. If a pre-commit hook fails, fix the cause and commit again. One task, one commit.
 
-Then set `status: done` in the task file, move it to `done/` in the tasks dir, and regenerate the index:
+Then set `status: done` in the task file, move it to `done/` in the tasks dir, and regenerate the index. `<python>` below means the first of `python`, `python3` whose `--version` exits 0 (some machines only have `python3`; on Windows `python3` can be a Store placeholder that fails).
 
 ```
-python "${CLAUDE_PLUGIN_ROOT}/scripts/index.py" "<tasks dir>"
+<python> "${CLAUDE_PLUGIN_ROOT}/scripts/index.py" "<tasks dir>"
 ```
 
-The script uses only the standard library, so it needs no project runner. The tasks dir may be git-ignored; if so, do not try to commit it.
+The script needs Python 3.10 or newer and uses only the standard library, so it needs no project runner. The tasks dir may be git-ignored; if so, do not try to commit it.
 
 Report to the user: the task, the commit, any optional findings left open, and anything you noticed.

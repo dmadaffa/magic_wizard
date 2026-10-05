@@ -5,7 +5,8 @@
 
 Task files are `<tasks-dir>/**/NNN-<slug>.md`: YAML-style front matter, then a
 `# N. Title` heading. Only `key: value` lines and `[a, b]` lists are read, so
-this needs nothing outside the standard library.
+this needs nothing outside the standard library. Needs Python 3.10+
+(`Path.write_text(newline=)`).
 
 Exit codes: 0 ok, 1 invalid tasks (every problem is printed to stderr and
 nothing is written), 2 bad usage or missing directory.

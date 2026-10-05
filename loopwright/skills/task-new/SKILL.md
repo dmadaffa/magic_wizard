@@ -22,10 +22,12 @@ Record open decisions with a recommendation; ask the user only if the type or th
 
 ## 3. Write the file
 
+`<python>` below means the first of `python`, `python3` whose `--version` exits 0 (some machines only have `python3`; on Windows `python3` can be a Store placeholder that fails). The script needs Python 3.10 or newer and nothing else.
+
 Get the id:
 
 ```
-python "${CLAUDE_PLUGIN_ROOT}/scripts/index.py" "<tasks dir>" --next-id
+<python> "${CLAUDE_PLUGIN_ROOT}/scripts/index.py" "<tasks dir>" --next-id
 ```
 
 If this exits 1, an existing task file is invalid: show the error and fix that file first.
@@ -51,7 +53,7 @@ Body, in this order:
 ## 4. Update the index
 
 ```
-python "${CLAUDE_PLUGIN_ROOT}/scripts/index.py" "<tasks dir>"
+<python> "${CLAUDE_PLUGIN_ROOT}/scripts/index.py" "<tasks dir>"
 ```
 
 If it fails, fix the file it names and run it again. Then tell the user the id, the path, and the open decisions if any.
