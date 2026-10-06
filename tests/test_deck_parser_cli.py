@@ -55,6 +55,16 @@ def test_cli_format_argument_overrides_header_format(tmp_path, args, expected):
     assert f"Format: {expected}" in result.stderr
 
 
+def test_no_path_prints_usage_and_exits_1():  # reproduces: with no path the CLI read the example deck and exited 0
+    result = subprocess.run(
+        [sys.executable, str(SCRIPT)],
+        capture_output=True, text=True, encoding="utf-8",
+    )
+    assert result.returncode == 1
+    assert result.stdout == ""
+    assert "Usage: deck_parser.py <path> [format words...]" in result.stderr
+
+
 def test_format_is_null_when_unknown(tmp_path):  # guard: no header and no argument gives JSON null, not a missing key or a string; fails at HEAD only on the JSON parse
     result = run_cli(tmp_path, deck="4 Quillfox Scout\n")
     assert json.loads(result.stdout)["format"] is None

@@ -114,10 +114,13 @@ def unique_names(deck: dict) -> list[str]:
 
 
 if __name__ == "__main__":
-    # Usage: deck_parser.py [path] [format words...]
+    # Usage: deck_parser.py <path> [format words...]
     # stdout: the deck as JSON only. stderr: human-readable summary.
     import json
-    path = sys.argv[1] if len(sys.argv) > 1 else "decks/example_deck.txt"
+    if len(sys.argv) < 2:
+        print("Usage: deck_parser.py <path> [format words...]", file=sys.stderr)
+        sys.exit(1)
+    path = sys.argv[1]
     # Optional remaining args override the format detected from the file header
     # (joined, so an unquoted multi-word format still works)
     format_override = " ".join(sys.argv[2:]) or None
