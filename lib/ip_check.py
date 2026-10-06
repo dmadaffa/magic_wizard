@@ -100,6 +100,18 @@ def _git(*args: str) -> str:
     ).stdout
 
 
+def _blob_text(*git_args: str) -> str | None:
+    """Output of a git command that prints a blob, as text; None if it isn't UTF-8.
+
+    Reads bytes and decodes here: text=True decodes in a reader thread on Windows,
+    where a binary blob's error is printed instead of raised."""
+    raw = subprocess.run(["git", *git_args], cwd=ROOT, capture_output=True, check=True).stdout
+    try:
+        return raw.decode("utf-8")
+    except UnicodeDecodeError:
+        return None
+
+
 def tracked_files(staged: bool) -> list[tuple[str, str]]:
     """(path, content) for tracked and untracked, non-ignored files, or for the staged
     version of changed files."""
@@ -113,11 +125,13 @@ def tracked_files(staged: bool) -> list[tuple[str, str]]:
             continue
         try:
             if staged:
-                content = _git("show", f":{path}")
+                content = _blob_text("show", f":{path}")
             else:
                 content = (ROOT / path).read_text(encoding="utf-8")
         except (UnicodeDecodeError, subprocess.CalledProcessError, OSError):
             continue  # binary or unreadable
+        if content is None:
+            continue  # binary
         out.append((path, content))
     return out
 
@@ -136,13 +150,11 @@ def history_files() -> list[tuple[str, str]]:
             continue
         seen.add(sha)
         try:
-            # Bytes, then decode here: text=True decodes in a reader thread on Windows,
-            # where a binary blob's error is printed instead of raised.
-            raw = subprocess.run(["git", "cat-file", "blob", sha], cwd=ROOT,
-                                 capture_output=True, check=True).stdout
-            content = raw.decode("utf-8")
-        except (UnicodeDecodeError, subprocess.CalledProcessError):
-            continue  # tree object or binary
+            content = _blob_text("cat-file", "blob", sha)
+        except subprocess.CalledProcessError:
+            continue  # tree object
+        if content is None:
+            continue  # binary
         out.append((f"{path}@{sha[:7]}", content))
     for entry in _git("log", "--all", "--format=%x01%H%x02%B").split("\x01")[1:]:
         sha, _, message = entry.partition("\x02")

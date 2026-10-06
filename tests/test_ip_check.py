@@ -111,6 +111,15 @@ def test_whole_repo_check_skips_git_ignored_files(tmp_path, monkeypatch):
     assert "clean.txt" in paths
 
 
+def test_staged_scan_skips_binary_files_and_still_finds_names(tmp_path, monkeypatch):
+    repo = _repo(tmp_path, monkeypatch)
+    (repo / "image.bin").write_bytes(b"PNG\xff\xfe\x00\x80 Thornquill")
+    (repo / "new.py").write_text("x = 'Thornquill'\n", encoding="utf-8")
+    _git(repo, "add", "image.bin", "new.py")
+    files = ip_check.tracked_files(staged=True)
+    assert check(files, _NAMES, set()) == [("new.py", 1, "Thornquill")]
+
+
 def test_offline_without_catalog_falls_back_to_card_cache(tmp_path, capsys):
     cache_path = tmp_path / "card_cache.jsonl"
     entry = {"name": "Quenchfire // Emberwake", "scryfall": {
