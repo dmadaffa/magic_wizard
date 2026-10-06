@@ -1,10 +1,10 @@
 # Magic Wizard — MTG Deck Assistant
 
-> **Tasks:** read `tasks/INDEX.md`, then only the task file you need. For each bug: write a failing test first (fixtures: Scryfall's real JSON shape, invented card content), then fix. Don't mark a bug done unless its test fails without the fix. Mark it done by setting `status: done`, moving the file to `tasks/done/` and regenerating the index with `python -m uv run python loopwright/scripts/index.py tasks/` (`--next-id` prints the next free id). `tasks/` is git-ignored. `/loopwright:task-work [id]` runs a task end to end (pick, developer, reviewer, commit, close); `/loopwright:task-new <description>` creates a task file and updates the index.
+> **Tasks:** read `tasks/INDEX.md`, then only the task file you need. For each bug: write a failing test first (fixtures: Scryfall's real JSON shape, invented card content), then fix. Don't mark a bug done unless its test fails without the fix. Mark it done by setting `status: done`, moving the file to `tasks/done/` and regenerating the index. `/loopwright:task-work` and `/loopwright:task-new` regenerate it; by hand, run `python <plugin>/scripts/index.py tasks/`, where `<plugin>` is the installed copy, `~/.claude/plugins/cache/loopwright/loopwright/<version>` (`--next-id` prints the next free id). `tasks/` is git-ignored. `/loopwright:task-work [id]` runs a task end to end (pick, developer, reviewer, commit, close); `/loopwright:task-new <description>` creates a task file and updates the index.
 
 > **Card content is IP.** No real card names, rules text or Scryfall ids in any tracked file except this one: use invented cards in tests, fixtures, docstrings and examples. `scripts/check_ip.py` enforces it via a pre-commit hook; enable it once per clone with `git config core.hooksPath .githooks`. The same hook runs `ruff check` on staged `.py` files (version and rules pinned in `pyproject.toml`; run `python -m uv run ruff check .`). Names that are also plain words go in `lib/ip_allowlist.txt`. Cost and accuracy numbers: `docs/benchmarks.md`.
 
-> **Agent workflow:** for a bug or small feature, spawn the `loopwright:developer` subagent (Sonnet) with the task definition, then the `loopwright:code-reviewer` subagent with the same task definition and not the developer's reasoning. Commit only after the review passes. The agents come from the `loopwright` plugin (loaded via `.claude-plugin/marketplace.json` and `.claude/settings.json`). Generic rules for both live in `loopwright/rules.md`; project rules live in `docs/agent-rules.md` (add new project rules there); `.claude/loopwright.md` tells the agents where those are and which test and check commands to run.
+> **Agent workflow:** for a bug or small feature, spawn the `loopwright:developer` subagent (Sonnet) with the task definition, then the `loopwright:code-reviewer` subagent with the same task definition and not the developer's reasoning. Commit only after the review passes. The agents come from the `loopwright` plugin (https://github.com/dmadaffa/loopwright, installed via `.claude/settings.json`). Generic rules for both live in the plugin's `rules.md`; project rules live in `docs/agent-rules.md` (add new project rules there); `.claude/loopwright.md` tells the agents where those are and which test and check commands to run.
 
 Agentic system for analyzing Magic: The Gathering decks. Uses Scryfall as the card data source and a local JSON Lines cache to avoid redundant API calls.
 
@@ -88,13 +88,7 @@ tests/fixtures/scryfall/    invented cards in Scryfall's JSON shape
 decks/                      your deck list files
 .claude/commands/           Claude Code skills
 .claude/loopwright.md       project-to-plugin contract: tasks dir, rules file, test/check commands, commit trailer
-.claude/settings.json       enables the loopwright plugin via the local marketplace
-.claude-plugin/marketplace.json  local marketplace listing the loopwright plugin
+.claude/settings.json       enables the loopwright plugin from its GitHub marketplace
 docs/agent-rules.md         project rules the subagents follow / check
-loopwright/                 generic task-workflow plugin (built to be extracted); scripts/index.py builds tasks/INDEX.md, scripts/run_on_base.py runs tests on the base revision for the reviewer, tests in loopwright/tests/
-loopwright/agents/          developer + code-reviewer subagents (loopwright:*)
-loopwright/skills/          init, task-work and task-new skills (/loopwright:init, /loopwright:task-work, /loopwright:task-new)
-loopwright/templates/       config template used by /loopwright:init
-loopwright/rules.md         generic rules both subagents follow / check
 tasks/                      task files by folder (bugs, features, unrefined, done) + generated INDEX.md; git-ignored
 ```

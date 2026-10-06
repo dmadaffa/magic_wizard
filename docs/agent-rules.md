@@ -1,6 +1,6 @@
 # Agent rules
 
-The project rules file named in `.claude/loopwright.md`. The `loopwright:developer` and `loopwright:code-reviewer` subagents read it after `loopwright/rules.md` (the generic rules), at the start of every task: the developer follows these rules, the reviewer checks them.
+The project rules file named in `.claude/loopwright.md`. The `loopwright:developer` and `loopwright:code-reviewer` subagents read it after the plugin's `rules.md` (the generic rules), at the start of every task: the developer follows these rules, the reviewer checks them.
 
 To add a project rule, append a section here. Keep each rule short and say why it exists, so an agent can judge edge cases.
 

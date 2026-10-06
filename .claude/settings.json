@@ -1,6 +1,13 @@
 {
-  "extraKnownMarketplaces": {
-    "magic-wizard": { "source": { "source": "directory", "path": "./" } }
+  "enabledPlugins": {
+    "loopwright@loopwright": true
   },
-  "enabledPlugins": { "loopwright@magic-wizard": true }
+  "extraKnownMarketplaces": {
+    "loopwright": {
+      "source": {
+        "source": "github",
+        "repo": "dmadaffa/loopwright"
+      }
+    }
+  }
 }

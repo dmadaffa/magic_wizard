@@ -1,6 +1,6 @@
 # Loopwright project settings
 
-The only contract between this project and the `loopwright` plugin (`loopwright/`). The `loopwright:developer` and `loopwright:code-reviewer` agents read it, and so can a skill. The plugin's own generic rules live in `loopwright/rules.md`. Keep the section labels as they are.
+The only contract between this project and the `loopwright` plugin (https://github.com/dmadaffa/loopwright). The `loopwright:developer` and `loopwright:code-reviewer` agents read it, and so can a skill. The plugin's own generic rules live in the plugin's `rules.md`. Keep the section labels as they are.
 
 ## Tasks dir
 
