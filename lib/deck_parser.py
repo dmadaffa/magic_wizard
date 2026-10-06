@@ -121,6 +121,10 @@ if __name__ == "__main__":
         print("Usage: deck_parser.py <path> [format words...]", file=sys.stderr)
         sys.exit(1)
     path = sys.argv[1]
+    flags = [a for a in sys.argv[2:] if a.startswith("--")]
+    if flags:
+        print(f"Unknown flag: {flags[0]} (flags belong to the skill, not the parser)", file=sys.stderr)
+        sys.exit(2)
     # Optional remaining args override the format detected from the file header
     # (joined, so an unquoted multi-word format still works)
     format_override = " ".join(sys.argv[2:]) or None

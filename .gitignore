@@ -12,6 +12,8 @@ data/
 decks/*
 !decks/.gitkeep
 inputs/
+# Saved analyses (/analyze-deck --save) contain real card names
+output/
 
 # Local working notes (task notes mention real card names)
 tasks/

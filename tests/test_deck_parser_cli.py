@@ -18,12 +18,12 @@ DECK = """// Modern Zorbling Tempo
 """
 
 
-def run_cli(tmp_path, *extra, deck=DECK):
+def run_cli(tmp_path, *extra, deck=DECK, check=True):
     path = tmp_path / "deck.txt"
     path.write_text(deck, encoding="utf-8")
     return subprocess.run(
         [sys.executable, str(SCRIPT), str(path), *extra],
-        capture_output=True, text=True, encoding="utf-8", check=True,
+        capture_output=True, text=True, encoding="utf-8", check=check,
     )
 
 
@@ -63,6 +63,18 @@ def test_no_path_prints_usage_and_exits_1():  # reproduces: with no path the CLI
     assert result.returncode == 1
     assert result.stdout == ""
     assert "Usage: deck_parser.py <path> [format words...]" in result.stderr
+
+
+@pytest.mark.parametrize("args", [
+    ["--save"],
+    ["Modern", "--save"],
+    ["--save", "Modern"],
+])
+def test_flag_argument_is_an_error_naming_the_flag(tmp_path, args):  # reproduces: "--save" became the format "--Save" and exited 0
+    result = run_cli(tmp_path, *args, check=False)
+    assert result.returncode == 2
+    assert result.stdout == ""
+    assert "--save" in result.stderr
 
 
 def test_format_is_null_when_unknown(tmp_path):  # guard: no header and no argument gives JSON null, not a missing key or a string; fails at HEAD only on the JSON parse

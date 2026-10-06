@@ -1,14 +1,18 @@
 Analyze a Magic: The Gathering deck list and provide concise, actionable feedback.
 
 ## Input
-The user provides a path to a deck list file, and optionally a format name.
+The user provides a path to a deck list file, and optionally a format name and flags.
 
 Examples:
 - `/analyze-deck decks/my_deck.txt`
 - `/analyze-deck decks/my_deck.txt Modern`
 - `/analyze-deck decks/draft.txt Standard`
+- `/analyze-deck decks/my_deck.txt Modern --save` (also writes the analysis to `output/`)
 
-Split `$ARGUMENTS` into the **file path** (first token) and an optional **format name** (remaining tokens, e.g. "Modern", "Standard", "Commander").
+Split `$ARGUMENTS` into the **file path** (first token), **flags** and an optional **format name**:
+- Tokens starting with `--` are flags. They can appear anywhere after the path (`decks/x.txt Modern --save` and `decks/x.txt --save Modern` mean the same).
+- `--save` is the only known flag. For an unknown flag, stop and tell the user; don't pass it on.
+- The remaining non-flag tokens are the format name (e.g. "Modern", "Standard", "Commander"), passed to Step 1 as before. Never pass a flag to the parser.
 
 ## Steps — follow in order, do not skip
 
@@ -95,6 +99,15 @@ Produce output in this exact structure — bullet points, no prose padding:
 - Cut: [card name] (N copies) → Add: [replacement] — [one-sentence reason]
 
 ---
+
+### Step 5 — Save (only with `--save`)
+Skip this step without `--save`; nothing is written.
+
+With `--save`: create `output/` if it is missing, then write `output/<deck file stem>_<YYYY-MM-DD>.md` (today's date) with the Write tool. A second save of the same deck on the same day overwrites that file. The file holds:
+- a short header: deck name (the file stem), date, active format (`unknown` if `null`) and the source path
+- the Step 4 sections, word for word as shown in chat
+
+Then end the chat with one line: `Saved: output/<file>.md`.
 
 ## Tone and length
 - Be concise. No filler sentences.
