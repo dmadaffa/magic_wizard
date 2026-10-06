@@ -22,8 +22,8 @@ CACHE_PATH = ROOT / "data" / "card_cache.jsonl"
 ALLOWLIST_PATH = ROOT / "lib" / "ip_allowlist.txt"
 NAMES_MAX_AGE = 30 * 24 * 3600  # seconds; new sets come out every few months
 
-# Files allowed to contain real names: CLAUDE.md by policy, the rest are not prose.
-EXEMPT_FILES = frozenset({"CLAUDE.md", "uv.lock", "lib/ip_allowlist.txt"})
+# Files allowed to contain real names: they are not prose.
+EXEMPT_FILES = frozenset({"uv.lock", "lib/ip_allowlist.txt"})
 
 # Apostrophes and hyphens only inside a word, so 'Name' in quotes still matches Name.
 _TOKEN_RE = re.compile(r"\w+(?:['\-]\w+)*")
@@ -119,6 +119,34 @@ def tracked_files(staged: bool) -> list[tuple[str, str]]:
         except (UnicodeDecodeError, subprocess.CalledProcessError, OSError):
             continue  # binary or unreadable
         out.append((path, content))
+    return out
+
+
+def history_files() -> list[tuple[str, str]]:
+    """(label, content) for every blob reachable from any ref and every commit message.
+
+    A blob is labelled "<path>@<short blob sha>" (trace it with `git log --find-object`),
+    a commit message "commit <short sha>". A blob seen under several paths is scanned
+    once, under its first path; exempt paths are skipped."""
+    out = []
+    seen = set()
+    for line in _git("rev-list", "--objects", "--all").splitlines():
+        sha, _, path = line.partition(" ")
+        if not path or path in EXEMPT_FILES or sha in seen:
+            continue
+        seen.add(sha)
+        try:
+            # Bytes, then decode here: text=True decodes in a reader thread on Windows,
+            # where a binary blob's error is printed instead of raised.
+            raw = subprocess.run(["git", "cat-file", "blob", sha], cwd=ROOT,
+                                 capture_output=True, check=True).stdout
+            content = raw.decode("utf-8")
+        except (UnicodeDecodeError, subprocess.CalledProcessError):
+            continue  # tree object or binary
+        out.append((f"{path}@{sha[:7]}", content))
+    for entry in _git("log", "--all", "--format=%x01%H%x02%B").split("\x01")[1:]:
+        sha, _, message = entry.partition("\x02")
+        out.append((f"commit {sha[:7]}", message))
     return out
 
 

@@ -27,6 +27,11 @@ Blaze
 Jolt
 Dawn
 Dusk
+Commit
+Start
+Delete
+Tracker
+Brawl  # a format name
 Sentinel
 Colossus
 Warden

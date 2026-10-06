@@ -34,7 +34,7 @@ stdout is the JSON document (the script prints a human-readable summary to stder
 
 ### Step 2 — Populate the card cache
 Extract all unique card names from `commander`, `companion`, `main` and `side`.
-Run the card fetcher sub-agent to fetch any cards not already in the cache:
+Run the card fetcher script to fetch any cards not already in the cache:
 ```
 uv run python agents/card_fetcher.py "<card1>" "<card2>" ...
 ```

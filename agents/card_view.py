@@ -1,4 +1,4 @@
-"""Card view sub-agent: prints compact card lines from the cache for the analysis step.
+"""Card view script: prints compact card lines from the cache for the analysis step.
 
 Usage:
     uv run python agents/card_view.py "Card Name 1" "Card Name 2"

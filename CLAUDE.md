@@ -2,11 +2,11 @@
 
 > **Tasks:** read `tasks/INDEX.md`, then only the task file you need. For each bug: write a failing test first (fixtures: Scryfall's real JSON shape, invented card content), then fix. Don't mark a bug done unless its test fails without the fix. Mark it done by setting `status: done`, moving the file to `tasks/done/` and regenerating the index. `/loopwright:task-work` and `/loopwright:task-new` regenerate it; by hand, run `python <plugin>/scripts/index.py tasks/`, where `<plugin>` is the installed copy, `~/.claude/plugins/cache/loopwright/loopwright/<version>` (`--next-id` prints the next free id). `tasks/` is git-ignored. `/loopwright:task-work [id]` runs a task end to end (pick, developer, reviewer, commit, close); `/loopwright:task-new <description>` creates a task file and updates the index.
 
-> **Card content is IP.** No real card names, rules text or Scryfall ids in any tracked file except this one: use invented cards in tests, fixtures, docstrings and examples. `scripts/check_ip.py` enforces it via a pre-commit hook; enable it once per clone with `git config core.hooksPath .githooks`. The same hook runs `ruff check` on staged `.py` files (version and rules pinned in `pyproject.toml`; run `python -m uv run ruff check .`). Names that are also plain words go in `lib/ip_allowlist.txt`. Cost and accuracy numbers: `docs/benchmarks.md`.
+> **Card content is IP.** No real card names, rules text or Scryfall ids in any tracked file, this one included (only `uv.lock` and the allowlist are exempt): use invented cards in tests, fixtures, docstrings and examples. `scripts/check_ip.py` enforces it via a pre-commit hook; `check_ip.py --history` scans every blob and commit message in all refs. Enable the hook once per clone with `git config core.hooksPath .githooks`. The same hook runs `ruff check` on staged `.py` files (version and rules pinned in `pyproject.toml`; run `python -m uv run ruff check .`). Names that are also plain words go in `lib/ip_allowlist.txt`. Cost and accuracy numbers: `docs/benchmarks.md`.
 
 > **Agent workflow:** for a bug or small feature, spawn the `loopwright:developer` subagent (Sonnet) with the task definition, then the `loopwright:code-reviewer` subagent with the same task definition and not the developer's reasoning. Commit only after the review passes. The agents come from the `loopwright` plugin (https://github.com/dmadaffa/loopwright, installed via `.claude/settings.json`). Generic rules for both live in the plugin's `rules.md`; project rules live in `docs/agent-rules.md` (add new project rules there); `.claude/loopwright.md` tells the agents where those are and which test and check commands to run.
 
-Agentic system for analyzing Magic: The Gathering decks. Uses Scryfall as the card data source and a local JSON Lines cache to avoid redundant API calls.
+LLM-assisted analyzer for Magic: The Gathering decks: a deterministic Python pipeline (parse the deck list, fetch and cache cards from Scryfall, print a compact card view) plus one Claude analysis step. Uses Scryfall as the card data source and a local JSON Lines cache to avoid redundant API calls.
 
 ## Quick Start
 
@@ -76,8 +76,8 @@ No other changes needed.
 ## Project Structure
 
 ```
-agents/card_fetcher.py      sub-agent: Scryfall fetch + cache write
-agents/card_view.py         sub-agent: compact card lines for the analysis
+agents/card_fetcher.py      script: Scryfall fetch + cache write
+agents/card_view.py         script: compact card lines for the analysis
 lib/cache.py                CardCache class (JSON Lines)
 lib/card_model.py           Card/Face model, layout + keyword access rules
 lib/deck_parser.py          deck list parser

@@ -3,9 +3,11 @@
 Usage:
     uv run python scripts/check_ip.py            # all tracked and untracked, non-ignored files
     uv run python scripts/check_ip.py --staged   # staged changes (pre-commit hook)
+    uv run python scripts/check_ip.py --history  # every blob and commit message in all refs
     uv run python scripts/check_ip.py --refresh  # re-download the name catalog first
 
-Names that are also plain words go in lib/ip_allowlist.txt. CLAUDE.md is exempt.
+Names that are also plain words go in lib/ip_allowlist.txt. No file is exempt except uv.lock and the allowlist.
+History hits read <path>@<short blob sha>:<line> or commit <short sha>:<line>.
 Exit code 0 if clean, 1 if any name was found.
 """
 
@@ -17,18 +19,20 @@ from pathlib import Path
 # Allow running as a script from the project root
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from lib.ip_check import check, load_allowlist, load_names, tracked_files
+from lib.ip_check import check, history_files, load_allowlist, load_names, tracked_files
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--staged", action="store_true", help="check staged changes only")
+    parser.add_argument("--history", action="store_true",
+                        help="scan every blob and commit message reachable from all refs")
     parser.add_argument("--refresh", action="store_true", help="re-download the card name catalog")
     args = parser.parse_args(argv)
 
     start = time.perf_counter()
     names = load_names(refresh=args.refresh)
-    files = tracked_files(staged=args.staged)
+    files = history_files() if args.history else tracked_files(staged=args.staged)
     hits = check(files, names, load_allowlist())
     elapsed = time.perf_counter() - start
 

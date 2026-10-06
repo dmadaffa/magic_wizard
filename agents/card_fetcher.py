@@ -1,4 +1,4 @@
-"""Card fetcher sub-agent.
+"""Card fetcher script.
 
 Usage:
     uv run python agents/card_fetcher.py "Cinder Dart" "Island" "Null Ripple"

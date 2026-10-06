@@ -11,7 +11,7 @@ To add a project rule, append a section here. Keep each rule short and say why i
 
 ## Card content is IP
 
-- No real Magic card names, rules text or Scryfall ids in any tracked file except `CLAUDE.md`. Use invented cards in tests, fixtures, docstrings, comments and examples.
+- No real Magic card names, rules text or Scryfall ids in any tracked file (only `uv.lock` and `lib/ip_allowlist.txt` are exempt). Use invented cards in tests, fixtures, docstrings, comments and examples.
 - The pre-commit hook (`scripts/check_ip.py --staged`) scans **every staged file in full**, not only the changed lines. A file you touch must be completely clean, even lines you did not write. If a file you need to edit already contains real names, report it rather than working around the hook.
 - Invented names can collide with real cards, even single words. Check new names before you use them: `python -m uv run python scripts/check_ip.py` (whole repo) must not report them.
 - Words that are both card names and plain words go in `lib/ip_allowlist.txt`. Only add ordinary words, never a distinctive name.

@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+
+      - name: Install Python and dependencies
+        run: uv sync  # uv reads .python-version
+
+      - name: Tests
+        run: uv run pytest -q
+
+      - name: Ruff
+        run: uv run ruff check .
+
+      # The IP check needs Scryfall's card name catalog (data/card_names.json, git-ignored).
+      # load_names falls back to the (empty) local card cache if the download fails, which
+      # would make the check pass with no names, so download it explicitly and fail if it
+      # is missing or empty.
+      - name: Download card name catalog
+        run: |
+          uv run python -c "from lib.ip_check import load_names; load_names(refresh=True)"
+          test -s data/card_names.json
+
+      - name: IP check (tree)
+        run: uv run python scripts/check_ip.py
