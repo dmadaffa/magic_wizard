@@ -24,11 +24,24 @@ jobs:
 
       # The IP check needs Scryfall's card name catalog (data/card_names.json, git-ignored).
       # load_names falls back to the (empty) local card cache if the download fails, which
-      # would make the check pass with no names, so download it explicitly and fail if it
-      # is missing or empty.
+      # would make the check pass with no names, so make sure the catalog is present and
+      # fail if it is missing or empty.
+      # Cached between runs, keyed by month, so CI downloads the catalog (Scryfall asks
+      # clients to cache for 24h or more) about once a month. load_names downloads only
+      # when the file is missing or stale.
+      - name: Get year-month for the catalog cache key
+        id: month
+        run: echo "month=$(date +%Y-%m)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache card name catalog
+        uses: actions/cache@v4
+        with:
+          path: data/card_names.json
+          key: card-names-${{ steps.month.outputs.month }}
+
       - name: Download card name catalog
         run: |
-          uv run python -c "from lib.ip_check import load_names; load_names(refresh=True)"
+          uv run python -c "from lib.ip_check import load_names; load_names()"
           test -s data/card_names.json
 
       - name: IP check (tree)

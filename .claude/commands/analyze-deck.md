@@ -40,6 +40,11 @@ uv run python agents/card_fetcher.py "<card1>" "<card2>" ...
 ```
 Pass ALL unique card names (every section) in a single call. The fetcher handles cache hits itself.
 
+Check the fetcher's output:
+- If it printed a rate-limit message (the run is taking longer than usual because Scryfall rate-limited it), tell the user.
+- If it lists cards under `Not fetched (Scryfall rate limit)`, tell the user which cards and that they should try again later. You may still continue with Step 3 for the cards that are cached, but the analysis must say it does not cover them: in Step 4, make the first bullet under **Format Legality** `Not covered (Scryfall rate limit, try again later): <cards>`, so it appears in the chat output and in the `--save` file. Never analyze an incomplete card set silently.
+- Cards under `Not found` are a different problem (misspelled or unknown names); report them as before.
+
 ### Step 3 — Load card data
 Run the card view for all unique card names (every section) in a single call:
 ```

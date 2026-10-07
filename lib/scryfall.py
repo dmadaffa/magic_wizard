@@ -2,13 +2,22 @@
 
 import sys
 import time
+import tomllib
+from pathlib import Path
 
 import requests
 
 BASE_URL = "https://api.scryfall.com"
 # /cards/named is capped at 2/second; 550ms gives headroom without being wasteful
 _RATE_LIMIT_SLEEP = 0.55
-_HEADERS = {"User-Agent": "magic-wizard-deck-assistant/0.1 (personal project)"}
+_ROOT = Path(__file__).parent.parent
+with open(_ROOT / "pyproject.toml", "rb") as _f:
+    _VERSION = tomllib.load(_f)["project"]["version"]
+# Scryfall asks for an accurate User-Agent (app name and version) and an Accept header.
+_HEADERS = {
+    "User-Agent": f"magic-wizard/{_VERSION} (+https://github.com/dmadaffa/magic_wizard)",
+    "Accept": "application/json",
+}
 
 # Legality columns shown by the analysis; the full legalities dict is still stored.
 LEGALITY_FORMATS = ("standard", "modern", "pioneer", "legacy", "commander")
@@ -28,31 +37,49 @@ _DROP_KEYS = frozenset({
     "variation", "preview",
 })
 
-_MAX_RETRIES = 5
-_BACKOFF_BASE = 2.0  # seconds; waits are BASE ** attempt: 1, 2, 4, 8, 16
+# Scryfall limits access for 30s after a 429; waiting less just draws another one.
+_RATE_LIMIT_WAIT = 30.0
 
 
 class CardNotFoundError(Exception):
     pass
 
 
+class RateLimitedError(Exception):
+    """Scryfall answered 429 again after the 30s wait; stop sending requests."""
+
+
+def _retry_after(resp: requests.Response) -> float:
+    try:
+        return float(resp.headers.get("Retry-After", 0))
+    except (TypeError, ValueError):
+        return 0.0
+
+
 def _get_with_backoff(url: str, **kwargs) -> requests.Response:
-    """GET with exponential backoff on 429 responses."""
-    for attempt in range(_MAX_RETRIES):
-        time.sleep(_RATE_LIMIT_SLEEP)
-        resp = requests.get(url, **kwargs)
-        if resp.status_code != 429:
-            return resp
-        wait = _BACKOFF_BASE ** attempt
-        print(
-            f"[scryfall] 429 rate-limited — retrying in {wait:.0f}s "
-            f"(attempt {attempt + 1}/{_MAX_RETRIES})",
-            file=sys.stderr,
-        )
-        time.sleep(wait)
-    # Final attempt after max retries
+    """GET; on a 429 tell the user, wait max(30s, Retry-After), retry once.
+
+    A second 429 raises RateLimitedError: Scryfall bans clients that keep going.
+    """
     time.sleep(_RATE_LIMIT_SLEEP)
-    return requests.get(url, **kwargs)
+    resp = requests.get(url, **kwargs)
+    if resp.status_code != 429:
+        return resp
+    wait = max(_RATE_LIMIT_WAIT, _retry_after(resp))
+    print(
+        f"[scryfall] This run is taking longer than usual because of Scryfall's "
+        f"rate limit (HTTP 429). Waiting {wait:.0f}s before retrying once.",
+        file=sys.stderr,
+    )
+    time.sleep(wait)
+    time.sleep(_RATE_LIMIT_SLEEP)
+    resp = requests.get(url, **kwargs)
+    if resp.status_code == 429:
+        raise RateLimitedError(
+            "Scryfall is still rate-limiting requests (HTTP 429) after a "
+            f"{wait:.0f}s wait; try again later"
+        )
+    return resp
 
 
 def fetch_card(name: str) -> dict:
