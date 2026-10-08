@@ -1,5 +1,8 @@
 # Magic Wizard
 
+[![CI](https://github.com/dmadaffa/magic_wizard/actions/workflows/ci.yml/badge.svg)](https://github.com/dmadaffa/magic_wizard/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 An LLM-assisted deck analyzer for Magic: The Gathering. Give it a deck list; it returns concise, actionable feedback.
 
 It is a deterministic Python pipeline plus one Claude call:

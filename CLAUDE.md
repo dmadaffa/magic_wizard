@@ -73,6 +73,14 @@ When the JSON Lines cache gets unwieldy:
 
 No other changes needed.
 
+## Releasing
+
+Tags are `vX.Y.Z` and match `version` in `pyproject.toml`.
+1. Bump `version` in `pyproject.toml` (it also sets the Scryfall User-Agent), commit and push `main`.
+2. Tag it: `git tag -a vX.Y.Z -m "Magic Wizard X.Y.Z"`.
+3. Publish the tag: `git push origin vX.Y.Z`.
+4. Create a GitHub release from the tag, titled "Magic Wizard X.Y.Z".
+
 ## Project Structure
 
 ```
