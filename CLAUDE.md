@@ -17,7 +17,8 @@ python -m uv sync
 # Analyze a deck
 /analyze-deck decks/example_deck.txt
 
-# Also write the analysis to output/<deck>_<date>.md
+# Also write the analysis to output/<deck>_<date>.md, plus replacements, alternative
+# strategies and a suggested list (also output/<deck>_<date>_suggested.txt)
 /analyze-deck decks/example_deck.txt Modern --save
 ```
 

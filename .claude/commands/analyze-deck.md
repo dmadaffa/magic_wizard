@@ -111,8 +111,44 @@ Skip this step without `--save`; nothing is written.
 With `--save`: create `output/` if it is missing, then write `output/<deck file stem>_<YYYY-MM-DD>.md` (today's date) with the Write tool. A second save of the same deck on the same day overwrites that file. The file holds:
 - a short header: deck name (the file stem), date, active format (`unknown` if `null`) and the source path
 - the Step 4 sections, word for word as shown in chat
+- three more sections after them, written only for the file (never shown in chat, never produced without `--save`):
 
-Then end the chat with one line: `Saved: output/<file>.md`.
+**`## Replacements`**: for each card the analysis flags as weak (the Suggestions cuts and anything else it criticises), 1–2 alternatives legal in the active format, each with a one-line reason. Use a table, and go beyond Suggestions without repeating it:
+
+| Card | Alternatives | Why |
+|---|---|---|
+| Gravel Warden | Ashfall Sentry, Mirrorbog Scout | Cheaper, still blocks early attackers |
+
+**`## Alternative strategies`**: 1–2 other directions built on the deck's existing core. For each: its name, the plan in 2–3 sentences, the key cards to add and to cut, and what it gives up.
+
+**`## Suggested deck list`**: the deck with the **Suggestions** applied (not the alternative strategies), in a `text` code block in the format the parser reads: a first line `// <Format>` (omit it if the active format is unknown), `N Name` lines, then `// Sideboard` and its lines (omit it if the deck has no sideboard). Commander decks keep the `// Commander` first line; only the sideboard marker is replaced by the Arena headers: `Commander`, the commander line(s), then `Deck` and the rest. Examples:
+
+```text
+// Modern
+4 Cinder Dart
+4 Null Ripple
+// Sideboard
+2 Gravel Warden
+```
+
+```text
+// Commander
+Commander
+1 Ashen Regent
+Deck
+1 Null Ripple
+1 Gravel Warden
+```
+
+Write the same list (without the code fence) to `output/<deck file stem>_<YYYY-MM-DD>_suggested.txt`, so it can be fed back to `/analyze-deck`. Name that path in the `.md` header.
+
+**Verify before the final write.** All checks are deterministic: no extra LLM call. Write the `_suggested.txt` first, then:
+1. Run `uv run python lib/deck_parser.py output/<stem>_<date>_suggested.txt` (stdout JSON). The main and sideboard counts (and the commander count) must equal the original deck's, unless the analysis itself flagged a count problem (e.g. an illegal deck size). Check copy limits: in constructed formats at most 4 of each card except basic lands; in Commander at most 1 except basic lands; in Limited, or when the format is unknown, no copy limit.
+2. Collect every card name in the three new sections that isn't in the original list. Pass them all to `card_fetcher.py` in one call. A name under `Not found` is invented or misspelt: replace it. A name under `Not fetched (Scryfall rate limit)` is not replaced: put it on the `Unverified:` line.
+3. Run `card_view.py` on those same names in one call and check each is legal in the active format. It only prints legality for Standard, Modern, Pioneer, Legacy and Commander. If the active format is not one of them, or is unknown, don't guess: put the new cards on the `Unverified:` line with the reason `no legality data for <format>` (or `format unknown`). Replace any card that is illegal in a covered format.
+4. After any replacement, update the table, the deck list and the `_suggested.txt`, then repeat from check 1. Allow at most 2 correction rounds. If something still fails, write the files anyway and add a line `Unverified: <cards or counts at fault>` directly under the deck list's code block in the `.md`.
+
+Write the final `.md` only after the checks. Then end the chat with one line only: `Saved: output/<file>.md`.
 
 ## Tone and length
 - Be concise. No filler sentences.

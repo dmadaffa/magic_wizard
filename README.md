@@ -37,7 +37,7 @@ Then, in Claude Code:
 /analyze-deck decks/my_deck.txt Modern --save
 ```
 
-`--save` also writes the analysis to `output/<deck>_<date>.md`.
+`--save` also writes the analysis to `output/<deck>_<date>.md`. The file also holds replacements, alternative strategies and a suggested deck list, which is also written to `output/<deck>_<date>_suggested.txt`.
 
 The format comes from a header line in the file, or from the second argument (which wins). See `CLAUDE.md` for the full deck format and the card cache details.
 

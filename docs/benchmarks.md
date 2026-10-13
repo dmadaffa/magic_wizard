@@ -64,3 +64,29 @@ Median of 10 runs, except where noted.
   single-word names and only warn about them. Multi-word names are the real IP risk.
 - Catalog download failing or growing past a few MB: keep the local card cache
   fallback and warn, as the script already does.
+
+## Saved analysis extras (`/analyze-deck --save`)
+
+Measured 2026-10-13 on two manual `--save` runs. Counted from the saved `.md`:
+"chat" is the Step 4 sections (the same text shown in chat), "extras" is
+`## Replacements` to the end. Lines are non-empty lines; words are whitespace-split.
+
+| Deck | Chat (lines / words) | Extras (lines / words) | Whole file (lines / words) | File / chat words | Correction rounds |
+|---|---|---|---|---|---|
+| 60-card Standard, 15-card sideboard | 25 / 404 | 46 / 332 | 75 / 750 | 1.86 | 1 (one new name not legal in Standard) |
+| 40-card Limited, 16-card pool sideboard, format unknown | 26 / 458 | 56 / 351 | 86 / 823 | 1.80 | 1 (sideboard count off by one after a basic-land swap) |
+
+The suggested deck list is about two thirds of the extras lines but only about a
+third of their words. Extras add roughly 0.8x the chat's words in output tokens,
+and only on `--save`.
+The checks themselves add no LLM call: one parser run, one fetcher call and one
+card view call per round.
+
+### Thresholds: when to revisit
+
+- Extras over **1.5x** the chat's words: drop the deck list from the `.md` and
+  keep it only in `_suggested.txt`.
+- Most runs needing 2 correction rounds, or ending with `Unverified:` for cards not
+  found, illegal cards or wrong counts (not for `format unknown` or `no legality
+  data`, which no check can fix): give the analysis step the candidate cards'
+  legality up front instead of checking after.
