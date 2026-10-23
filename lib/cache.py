@@ -4,7 +4,8 @@ Each line is {"name": <deck name>, "fetched_at": <iso time>, "scryfall": <trimme
 Interpret entries with lib.card_model.from_scryfall(entry["scryfall"]).
 
 To upgrade to SQLite: create lib/cache_sql.py implementing the same
-CardCache interface, then change the import in agents/card_fetcher.py and agents/card_view.py.
+CardCache interface, then change the import in agents/card_fetcher.py, agents/card_view.py
+and agents/deck_stats.py.
 """
 
 import json

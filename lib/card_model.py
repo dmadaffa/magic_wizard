@@ -60,7 +60,7 @@ KEYWORD_ACCESS: dict[str, tuple[int, str]] = {
 }
 
 _SYMBOL_RE = re.compile(r"\{([^}]+)\}")
-_COLOR_SYMBOLS = ("W", "U", "B", "R", "G")
+COLOR_SYMBOLS = ("W", "U", "B", "R", "G")
 
 
 def mana_value(mana_cost: str) -> float:
@@ -81,9 +81,19 @@ def mana_value(mana_cost: str) -> float:
     return total
 
 
+def color_pips(mana_cost: str) -> dict[str, int]:
+    """Colored pips per color in a printed cost; a hybrid pip counts for both colors."""
+    pips = dict.fromkeys(COLOR_SYMBOLS, 0)
+    for symbol in _SYMBOL_RE.findall(mana_cost or ""):
+        for part in symbol.split("/"):
+            if part in pips:
+                pips[part] += 1
+    return pips
+
+
 def _colors_in_cost(mana_cost: str) -> tuple[str, ...]:
-    found = {c for s in _SYMBOL_RE.findall(mana_cost or "") for c in _COLOR_SYMBOLS if c in s.split("/")}
-    return tuple(c for c in _COLOR_SYMBOLS if c in found)
+    found = {c for s in _SYMBOL_RE.findall(mana_cost or "") for c in COLOR_SYMBOLS if c in s.split("/")}
+    return tuple(c for c in COLOR_SYMBOLS if c in found)
 
 
 @dataclass(frozen=True)
@@ -121,6 +131,7 @@ class Card:
     legalities: dict[str, str]
     faces: tuple[Face, ...]
     warnings: tuple[str, ...] = field(default=())
+    produced_mana: tuple[str, ...] = field(default=())  # Scryfall `produced_mana`: W U B R G C
 
     @property
     def castable_faces(self) -> tuple[Face, ...]:
@@ -191,7 +202,7 @@ def from_scryfall(raw: dict) -> Card:
         identity = tuple(raw["color_identity"])
     else:
         seen = {c for f in faces for c in f.colors}
-        identity = tuple(c for c in _COLOR_SYMBOLS if c in seen)
+        identity = tuple(c for c in COLOR_SYMBOLS if c in seen)
 
     return Card(
         name=raw.get("name", ""),
@@ -205,4 +216,5 @@ def from_scryfall(raw: dict) -> Card:
         legalities=dict(raw.get("legalities", {})),
         faces=tuple(faces),
         warnings=tuple(warnings),
+        produced_mana=tuple(raw.get("produced_mana", ())),
     )

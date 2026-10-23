@@ -1,0 +1,175 @@
+{
+  "object": "card",
+  "id": "2121ef35-0092-5c16-bcbf-ae3d5fe1e5c2",
+  "oracle_id": "15d40410-9a61-5fe8-8311-e0e1a82fda52",
+  "multiverse_ids": [],
+  "mtgo_id": 2003,
+  "arena_id": 2003,
+  "tcgplayer_id": 2003,
+  "cardmarket_id": 2003,
+  "name": "Tidal Rite // Tidal Shore",
+  "lang": "en",
+  "released_at": "2026-01-01",
+  "uri": "https://api.example.invalid/tidal-rite/uri",
+  "scryfall_uri": "https://img.example.invalid/tidal-rite/uri",
+  "layout": "modal_dfc",
+  "highres_image": true,
+  "image_status": "highres_scan",
+  "image_updated_at": "2026-01-01T00:00:00Z",
+  "cmc": 2.0,
+  "type_line": "Instant // Land",
+  "color_identity": [
+    "U"
+  ],
+  "keywords": [],
+  "produced_mana": [
+    "U"
+  ],
+  "card_faces": [
+    {
+      "object": "card_face",
+      "name": "Tidal Rite",
+      "mana_cost": "{1}{U}",
+      "type_line": "Instant",
+      "oracle_text": "Draw a card.",
+      "colors": [
+        "U"
+      ],
+      "flavor_text": "Placeholder flavor text.",
+      "artist": "Test Artist",
+      "artist_id": "8b7a9198-d70b-524d-b131-8d64885367fe",
+      "illustration_id": "a2b89efa-f5db-5c85-9e90-e451629aa50e",
+      "image_uris": {
+        "small": "https://img.example.invalid/tidal-rite/urissmall",
+        "normal": "https://img.example.invalid/tidal-rite/urisnormal",
+        "large": "https://img.example.invalid/tidal-rite/urislarge",
+        "png": "https://img.example.invalid/tidal-rite/urispng",
+        "art_crop": "https://img.example.invalid/tidal-rite/crop",
+        "border_crop": "https://img.example.invalid/tidal-rite/crop",
+        "thumb": "https://img.example.invalid/tidal-rite/uristhumb",
+        "grid": "https://img.example.invalid/tidal-rite/urisgrid",
+        "display": "https://img.example.invalid/tidal-rite/urisdisplay",
+        "art": "https://img.example.invalid/tidal-rite/urisart",
+        "crop": "https://img.example.invalid/tidal-rite/uriscrop",
+        "jpeg": "https://img.example.invalid/tidal-rite/urisjpeg"
+      }
+    },
+    {
+      "object": "card_face",
+      "name": "Tidal Shore",
+      "mana_cost": "",
+      "type_line": "Land",
+      "oracle_text": "Tidal Shore enters tapped.\n{T}: Add {U}.",
+      "colors": [],
+      "flavor_text": "Placeholder flavor text.",
+      "artist": "Test Artist",
+      "artist_id": "535cd127-255f-54ed-8566-478f3134cb41",
+      "illustration_id": "b5e8c826-5720-51ea-9110-bd9d63e4e716",
+      "image_uris": {
+        "small": "https://img.example.invalid/tidal-rite/urissmall",
+        "normal": "https://img.example.invalid/tidal-rite/urisnormal",
+        "large": "https://img.example.invalid/tidal-rite/urislarge",
+        "png": "https://img.example.invalid/tidal-rite/urispng",
+        "art_crop": "https://img.example.invalid/tidal-rite/crop",
+        "border_crop": "https://img.example.invalid/tidal-rite/crop",
+        "thumb": "https://img.example.invalid/tidal-rite/uristhumb",
+        "grid": "https://img.example.invalid/tidal-rite/urisgrid",
+        "display": "https://img.example.invalid/tidal-rite/urisdisplay",
+        "art": "https://img.example.invalid/tidal-rite/urisart",
+        "crop": "https://img.example.invalid/tidal-rite/uriscrop",
+        "jpeg": "https://img.example.invalid/tidal-rite/urisjpeg"
+      }
+    }
+  ],
+  "legalities": {
+    "standard": "not_legal",
+    "future": "not_legal",
+    "historic": "legal",
+    "timeless": "legal",
+    "gladiator": "legal",
+    "pioneer": "legal",
+    "modern": "legal",
+    "legacy": "legal",
+    "pauper": "not_legal",
+    "vintage": "legal",
+    "penny": "not_legal",
+    "commander": "legal",
+    "oathbreaker": "legal",
+    "standardbrawl": "not_legal",
+    "brawl": "legal",
+    "competitivebrawl": "legal",
+    "alchemy": "not_legal",
+    "paupercommander": "not_legal",
+    "duel": "legal",
+    "oldschool": "not_legal",
+    "premodern": "not_legal",
+    "predh": "not_legal",
+    "tlr": "legal"
+  },
+  "games": [
+    "arena",
+    "paper",
+    "mtgo"
+  ],
+  "reserved": false,
+  "game_changer": false,
+  "foil": true,
+  "nonfoil": true,
+  "finishes": [
+    "nonfoil",
+    "foil"
+  ],
+  "oversized": false,
+  "promo": false,
+  "reprint": false,
+  "variation": false,
+  "set_id": "b3cac627-8404-5051-8f1a-44523fea5470",
+  "set": "tst",
+  "set_name": "Test Set",
+  "set_type": "expansion",
+  "set_uri": "https://api.example.invalid/tidal-rite/uri",
+  "set_search_uri": "https://api.example.invalid/tidal-rite/uri",
+  "scryfall_set_uri": "https://img.example.invalid/tidal-rite/uri",
+  "rulings_uri": "https://api.example.invalid/tidal-rite/uri",
+  "prints_search_uri": "https://api.example.invalid/tidal-rite/uri",
+  "collector_number": "3",
+  "digital": false,
+  "rarity": "rare",
+  "artist": "Test Artist",
+  "artist_ids": [
+    "1ef2fce2-8dc7-5040-b204-864cdcc7ffbe"
+  ],
+  "border_color": "black",
+  "frame": "2015",
+  "security_stamp": "oval",
+  "full_art": false,
+  "textless": false,
+  "booster": true,
+  "story_spotlight": false,
+  "edhrec_rank": 2003,
+  "penny_rank": 2003,
+  "preview": {
+    "source": "Test",
+    "source_uri": "https://example.invalid",
+    "previewed_at": "2026-01-01"
+  },
+  "prices": {
+    "usd": null,
+    "usd_foil": null,
+    "usd_etched": null,
+    "eur": null,
+    "eur_foil": null,
+    "tix": null
+  },
+  "related_uris": {
+    "gatherer": "https://img.example.invalid/tidal-rite/urisgatherer",
+    "tcgplayer_infinite_articles": "https://img.example.invalid/tidal-rite/articles",
+    "tcgplayer_infinite_decks": "https://img.example.invalid/tidal-rite/decks",
+    "edhrec": "https://img.example.invalid/tidal-rite/urisedhrec"
+  },
+  "purchase_uris": {
+    "tcgplayer": "https://img.example.invalid/tidal-rite/uristcgplayer",
+    "cardmarket": "https://img.example.invalid/tidal-rite/uriscardmarket",
+    "cardhoarder": "https://img.example.invalid/tidal-rite/uriscardhoarder"
+  }
+}

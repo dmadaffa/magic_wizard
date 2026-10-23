@@ -42,9 +42,10 @@ The format is read from the header lines before the first card: a comment like `
 1. `lib/deck_parser.py` — parses the deck list text
 2. `agents/card_fetcher.py` — fetches missing cards from Scryfall, stores in `data/card_cache.jsonl`
 3. `agents/card_view.py` — prints compact per-card (and per-face) lines from the cache
-4. `.claude/commands/analyze-deck.md` — orchestrator skill: parse → fetch → view cards → analyze
+4. `agents/deck_stats.py` — mana curve, color pips and mana sources of the main deck (rules in `lib/stats.py`)
+5. `.claude/commands/analyze-deck.md` — orchestrator skill: parse → fetch → view cards → deck stats → analyze
 
-The card fetcher and card view are pure Python with zero LLM cost. Claude is only called once for the analysis step.
+The card fetcher, card view and deck stats are pure Python with zero LLM cost. Claude is only called once for the analysis step.
 
 ## Card Cache
 
@@ -70,7 +71,7 @@ python -m uv run python agents/card_fetcher.py "Card Name 1" "Card Name 2"
 
 When the JSON Lines cache gets unwieldy:
 1. Create `lib/cache_sql.py` implementing the same `CardCache` interface (`get`, `put`, `get_many`)
-2. In `agents/card_fetcher.py` and `agents/card_view.py`, change `from lib.cache import CardCache` to `from lib.cache_sql import CardCache`
+2. In `agents/card_fetcher.py`, `agents/card_view.py` and `agents/deck_stats.py`, change `from lib.cache import CardCache` to `from lib.cache_sql import CardCache`
 
 No other changes needed.
 
@@ -87,6 +88,8 @@ Tags are `vX.Y.Z` and match `version` in `pyproject.toml`.
 ```
 agents/card_fetcher.py      script: Scryfall fetch + cache write
 agents/card_view.py         script: compact card lines for the analysis
+agents/deck_stats.py        script: curve, colors and mana sources of the main deck
+lib/stats.py                deck statistics (pure functions over Cards)
 lib/cache.py                CardCache class (JSON Lines)
 lib/card_model.py           Card/Face model, layout + keyword access rules
 lib/deck_parser.py          deck list parser

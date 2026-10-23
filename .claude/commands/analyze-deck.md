@@ -66,7 +66,13 @@ Multi-face cards list each face with how it is reached:
 - `prepared` — the spell copy cast while the creature is prepared
 - `flip`, `meld` — reached by flipping / melding
 
-For the **mana curve**, count each card at its `CMC` (for split cards this is the combined cost), and note cheaper `cast` faces (e.g. an adventure half or an MDFC land face) as flexibility. Treat back faces that are not `cast` as upside of the front face, not as separate spells.
+Treat back faces that are not `cast` as upside of the front face, not as separate spells.
+
+Then compute the mana numbers (main deck only, never count them by hand):
+```
+uv run python agents/deck_stats.py <file-path>
+```
+Output, one line each: `Curve:` (buckets 0, 1, 2, 3, 4, 5+, by copies, non-land cards only, each card once at its `CMC`, X counted as 0), `Average CMC:`, `Lands:`, `Flexible:` (cheaper castable faces and MDFC land faces), `X spells:`, `Colors (spells/pips):` (per color: spells needing it / total pips in castable costs, hybrid counts for both colors), `Sources:` (per color and C: lands and MDFC land faces that produce it) and `Nonland mana producers (not counted):`. `NOT CACHED: <name>` on stderr means a card is missing: say so in the analysis.
 
 Build two compact card lists prefixed with quantity (`4x ...`), keeping face lines for multi-face cards.
 Include oracle text only for non-obvious cards.
@@ -84,12 +90,11 @@ Produce output in this exact structure — bullet points, no prose padding:
 - If format is unknown: list legality across Standard / Modern / Pioneer / Legacy / Commander and highlight the most permissive format where the deck is fully legal.
 
 **Mana Curve** (main deck only)
-- CMC distribution: how many spells at each cost (0, 1, 2, 3, 4, 5+)
-- Average CMC of non-land spells
+- CMC distribution and average CMC: copy the `Curve:` and `Average CMC:` numbers from `deck_stats.py`; mention `Flexible:` and `X spells:` cards when relevant
 - One sentence on whether the curve fits the apparent strategy
 
 **Color Balance**
-- Mana sources per color vs. spells requiring that color
+- Mana sources per color vs. spells requiring that color: use the `Sources:` and `Colors (spells/pips):` numbers from `deck_stats.py`; mention nonland mana producers
 - Flag any significant imbalances
 
 **Synergy Notes**

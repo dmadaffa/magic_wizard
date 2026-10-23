@@ -10,7 +10,8 @@ It is a deterministic Python pipeline plus one Claude call:
 1. `lib/deck_parser.py` parses an MTGO/Arena deck list (main deck, sideboard, commander, format).
 2. `agents/card_fetcher.py` fetches cards missing from the local cache from the [Scryfall](https://scryfall.com) API and stores them in `data/card_cache.jsonl`.
 3. `agents/card_view.py` prints a compact line per card (and per face) from the cache.
-4. The `/analyze-deck` skill ([Claude Code](https://claude.com/claude-code)) runs those steps and asks Claude to analyze the deck. This is the only LLM step; steps 1-3 make no LLM calls.
+4. `agents/deck_stats.py` computes the mana curve, color pips and mana sources of the main deck.
+5. The `/analyze-deck` skill ([Claude Code](https://claude.com/claude-code)) runs those steps and asks Claude to analyze the deck. This is the only LLM step; steps 1-4 make no LLM calls.
 
 ## Quick start
 

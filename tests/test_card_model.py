@@ -128,3 +128,8 @@ def test_single_faced_card(scryfall):
 ])
 def test_mana_value(cost, expected):
     assert mana_value(cost) == expected
+
+
+@pytest.mark.parametrize("fixture,expected", [("land", ("R",)), ("instant", ()), ("modal_dfc_land", ("U",))])
+def test_card_exposes_produced_mana(scryfall, fixture, expected):
+    assert card(scryfall, fixture).produced_mana == expected
