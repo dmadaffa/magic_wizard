@@ -1,13 +1,20 @@
 """Card view script: prints compact card lines from the cache for the analysis step.
 
 Usage:
-    uv run python agents/card_view.py "Card Name 1" "Card Name 2"
+    uv run python agents/card_view.py [--format Modern] "Card Name 1" "Card Name 2"
+
+With --format only that format's legality is printed; the name is normalized
+(lowercase, spaces and hyphens removed: "Pauper Commander" -> paupercommander)
+and looked up in the card's Scryfall legalities. Without --format the five
+default formats are printed. A format Scryfall has no key for (e.g. explorer,
+draft) prints "unknown", meaning no legality data.
 
 Multi-face cards print one indented line per face, tagged with how that face
 is reached (cast, transform, prepared, ...). Exit code 1 if any card is not
 cached; warnings (e.g. unknown layouts) go to stderr.
 """
 
+import re
 import sys
 from pathlib import Path
 
@@ -36,8 +43,9 @@ def _text_lines(text: str, indent: str) -> list[str]:
     return [indent + line for line in text.splitlines() if line]
 
 
-def render(card: Card) -> str:
-    legality = ", ".join(f"{fmt}:{card.legalities.get(fmt, 'not_legal')}" for fmt in LEGALITY_FORMATS)
+def render(card: Card, fmt: str | None = None) -> str:
+    formats = (re.sub(r"[\s-]", "", fmt.lower()),) if fmt else LEGALITY_FORMATS
+    legality = ", ".join(f"{f}:{card.legalities.get(f, 'unknown')}" for f in formats)
     identity = "".join(card.color_identity) or "C"
     header = [card.name]
     if len(card.faces) > 1:
@@ -66,9 +74,9 @@ def render(card: Card) -> str:
     return "\n".join(lines)
 
 
-def main(names: list[str], cache: CardCache | None = None) -> int:
+def main(names: list[str], cache: CardCache | None = None, fmt: str | None = None) -> int:
     if not names:
-        print("Usage: card_view.py <card_name> [<card_name> ...]", file=sys.stderr)
+        print("Usage: card_view.py [--format <format>] <card_name> [<card_name> ...]", file=sys.stderr)
         return 1
 
     if cache is None:
@@ -81,7 +89,7 @@ def main(names: list[str], cache: CardCache | None = None) -> int:
         card = from_scryfall(entry["scryfall"])
         for warning in card.warnings:
             print(f"WARNING: {warning}", file=sys.stderr)
-        print(render(card))
+        print(render(card, fmt))
 
     for name in missing:
         print(f"NOT CACHED: {name}", file=sys.stderr)
@@ -91,4 +99,8 @@ def main(names: list[str], cache: CardCache | None = None) -> int:
 if __name__ == "__main__":
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
-    sys.exit(main(sys.argv[1:]))
+    args = sys.argv[1:]
+    fmt = None
+    if args[:1] == ["--format"] and len(args) >= 2:
+        fmt, args = args[1], args[2:]
+    sys.exit(main(args, fmt=fmt))

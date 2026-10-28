@@ -49,7 +49,7 @@ The card fetcher, card view and deck stats are pure Python with zero LLM cost. C
 
 ## Card Cache
 
-Card data lives in `data/card_cache.jsonl`: one line per card with the Scryfall card object (images, prices and links stripped). Cards are fetched once and reused indefinitely.
+Card data lives in `data/card_cache.jsonl`: one line per card with the Scryfall card object (images, prices and links stripped). Cards are fetched once and reused; the fetcher warns on stderr when a cached card is older than 3 months (legality changes with rotations and bans) but does not re-fetch it. Re-fetch named cards with `--refresh`; a failed refresh keeps the old entry and warns.
 
 Don't flatten Scryfall data when storing it. `lib/card_model.py` turns the stored object into a `Card` with `Face`s, so new mechanics are handled there without re-fetching.
 
@@ -65,7 +65,11 @@ Add a fixture to `tests/fixtures/scryfall/` (an invented card in Scryfall's real
 To manually pre-populate the cache:
 ```bash
 python -m uv run python agents/card_fetcher.py "Card Name 1" "Card Name 2"
+# Re-fetch cards whose legality may be stale
+python -m uv run python agents/card_fetcher.py --refresh "Card Name 1" "Card Name 2"
 ```
+
+`agents/card_view.py [--format "Pauper Commander"]` prints only that format's legality: the name is lowercased with spaces and hyphens removed and looked up in Scryfall's legalities (`unknown` if there is no such key, e.g. Explorer or Draft). Without `--format` it prints standard, modern, pioneer, legacy and commander.
 
 ## Upgrading to SQLite
 

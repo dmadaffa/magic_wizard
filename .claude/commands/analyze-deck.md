@@ -44,17 +44,20 @@ Check the fetcher's output:
 - If it printed a rate-limit message (the run is taking longer than usual because Scryfall rate-limited it), tell the user.
 - If it lists cards under `Not fetched (Scryfall rate limit)`, tell the user which cards and that they should try again later. You may still continue with Step 3 for the cards that are cached, but the analysis must say it does not cover them: in Step 4, make the first bullet under **Format Legality** `Not covered (Scryfall rate limit, try again later): <cards>`, so it appears in the chat output and in the `--save` file. Never analyze an incomplete card set silently.
 - Cards under `Not found` are a different problem (misspelled or unknown names); report them as before.
+- If stderr has a `WARNING: ... older than 3 months` line, show it to the user and suggest re-running the fetcher with `--refresh` for only the cards named in the warning (`uv run python agents/card_fetcher.py --refresh "<stale1>" "<stale2>" ...`) because legality changes with rotations and bans. Don't refresh on your own; the analysis continues with the cached data. A `could not refresh` warning means a `--refresh` re-fetch failed and the old entry was kept: pass it on too.
 
 ### Step 3 — Load card data
 Run the card view for all unique card names (every section) in a single call:
 ```
-uv run python agents/card_view.py "<card1>" "<card2>" ...
+uv run python agents/card_view.py --format "<format>" "<card1>" "<card2>" ...
 ```
+Pass `--format "<format>"` with the active format from Step 1 whenever it is not `null`; omit it if the format is `null`. With a format, each card line shows only that format's legality (the name is lowercased with spaces and hyphens removed and looked up in Scryfall's legalities, so "Pauper Commander" gives `paupercommander:<value>`); without one, the five defaults (standard, modern, pioneer, legacy, commander). `<format>:unknown` means Scryfall has no legality data for that format (e.g. Explorer): don't guess, and say so in **Format Legality**. Exception: in Limited (Limited, Draft, Sealed) there is nothing to check, since every card in a Limited pool is legal by definition; pass `--format` as usual (one `<format>:unknown` column instead of five) and ignore legality.
+
 Do not read `data/card_cache.jsonl` directly. The output has one block per card:
 ```
-Cinderquill Volley | {R} | CMC 1 | identity R | Instant | standard:not_legal, modern:legal, ...
+Cinderquill Volley | {R} | CMC 1 | identity R | Instant | modern:legal
     Cinderquill Volley deals 2 damage to any target.
-Tidewatch Apprentice // Tidewatch Horror | transform | CMC 1 | identity U | standard:not_legal, ...
+Tidewatch Apprentice // Tidewatch Horror | transform | CMC 1 | identity U | modern:legal
   [face 1: cast] Tidewatch Apprentice | {U} | Creature — Human Apprentice | 1/2
     At the beginning of your upkeep, ...
   [face 2: transform] Tidewatch Horror | Creature — Horror | 3/3
@@ -86,7 +89,8 @@ Produce output in this exact structure — bullet points, no prose padding:
 
 ---
 **Format Legality** (active format: _<format or "unknown">_)
-- If format is known: state whether the deck is fully legal in that format, noting any illegal cards by name.
+- If the format is Limited (Limited, Draft, Sealed): say that Limited has no legality check.
+- If format is another known format: state whether the deck is fully legal in that format, noting any illegal cards by name.
 - If format is unknown: list legality across Standard / Modern / Pioneer / Legacy / Commander and highlight the most permissive format where the deck is fully legal.
 
 **Mana Curve** (main deck only)
@@ -150,7 +154,7 @@ Write the same list (without the code fence) to `output/<deck file stem>_<YYYY-M
 **Verify before the final write.** All checks are deterministic: no extra LLM call. Write the `_suggested.txt` first, then:
 1. Run `uv run python lib/deck_parser.py output/<stem>_<date>_suggested.txt` (stdout JSON). The main and sideboard counts (and the commander count) must equal the original deck's, unless the analysis itself flagged a count problem (e.g. an illegal deck size). Check copy limits: in constructed formats at most 4 of each card except basic lands; in Commander at most 1 except basic lands; in Limited, or when the format is unknown, no copy limit.
 2. Collect every card name in the three new sections that isn't in the original list. Pass them all to `card_fetcher.py` in one call. A name under `Not found` is invented or misspelt: replace it. A name under `Not fetched (Scryfall rate limit)` is not replaced: put it on the `Unverified:` line.
-3. Run `card_view.py` on those same names in one call and check each is legal in the active format. It only prints legality for Standard, Modern, Pioneer, Legacy and Commander. If the active format is not one of them, or is unknown, don't guess: put the new cards on the `Unverified:` line with the reason `no legality data for <format>` (or `format unknown`). Replace any card that is illegal in a covered format.
+3. In Limited, skip this legality check and put no card on `Unverified:` for legality. Otherwise run `card_view.py` (with `--format "<format>"` when the active format is known, as in Step 3) on those same names in one call and check each is legal in the active format. If it prints `<format>:unknown` (no legality data for that format), or the active format is unknown, don't guess: put the new cards on the `Unverified:` line with the reason `no legality data for <format>` (or `format unknown`). Replace any card that is illegal in a covered format.
 4. After any replacement, update the table, the deck list and the `_suggested.txt`, then repeat from check 1. Allow at most 2 correction rounds. If something still fails, write the files anyway and add a line `Unverified: <cards or counts at fault>` directly under the deck list's code block in the `.md`.
 
 Write the final `.md` only after the checks. Then end the chat with one line only: `Saved: output/<file>.md`.

@@ -19,7 +19,7 @@ _HEADERS = {
     "Accept": "application/json",
 }
 
-# Legality columns shown by the analysis; the full legalities dict is still stored.
+# Default legality columns, shown when no format is given; the full legalities dict is still stored.
 LEGALITY_FORMATS = ("standard", "modern", "pioneer", "legacy", "commander")
 
 # Keys dropped before caching: images, prices, links and print trivia. Everything
