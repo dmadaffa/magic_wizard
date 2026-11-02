@@ -20,6 +20,9 @@ python -m uv sync
 # Also write the analysis to output/<deck>_<date>.md, plus replacements, alternative
 # strategies and a suggested list (also output/<deck>_<date>_suggested.txt)
 /analyze-deck decks/example_deck.txt Modern --save
+
+# Build one 60-card Standard deck from a pool file (writes output/<pool>_<date>_built.txt)
+/build-deck decks/pool.txt Standard
 ```
 
 ## Adding a Deck
@@ -109,7 +112,7 @@ data/scryfall_sets.json     /sets cache, refreshed after 1 day
 data/card_names.json        Scryfall name catalog for the IP check (30-day refresh)
 tests/fixtures/scryfall/    invented cards in Scryfall's JSON shape
 decks/                      your deck list files
-output/                     saved analyses (/analyze-deck --save), git-ignored
+output/                     saved analyses and built decks, git-ignored
 .claude/commands/           Claude Code skills
 .claude/loopwright.md       project-to-plugin contract: tasks dir, rules file, test/check commands, commit trailer
 .claude/settings.json       enables the loopwright plugin from its GitHub marketplace
