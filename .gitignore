@@ -8,7 +8,8 @@ dist/
 build/
 
 # Card data and deck lists stay local: Magic card content is third-party IP
-data/
+data/*
+!data/standard_rotation.json
 decks/*
 !decks/.gitkeep
 inputs/

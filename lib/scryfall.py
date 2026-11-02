@@ -1,5 +1,6 @@
 """Thin Scryfall API client — returns card objects trimmed of images, prices and links."""
 
+import json
 import sys
 import time
 import tomllib
@@ -117,3 +118,51 @@ def trim_card(data: dict) -> dict:
     if "all_parts" in card:
         card["all_parts"] = [_trim(part) for part in card["all_parts"]]
     return card
+
+
+def search_cards(query: str, order: str = "edhrec", pages: int = 1) -> list[dict]:
+    """Trimmed card objects matching a Scryfall search; follows next_page up to `pages` pages.
+
+    A 404 (no match) gives []. Requests are sequential and go through the backoff.
+    """
+    cards: list[dict] = []
+    url = f"{BASE_URL}/cards/search"
+    params: dict | None = {"q": query, "order": order}
+    for _ in range(pages):
+        resp = _get_with_backoff(url, params=params, headers=_HEADERS, timeout=30)
+        if resp.status_code == 404:
+            return cards
+        resp.raise_for_status()
+        body = resp.json()
+        cards.extend(trim_card(c) for c in body["data"])
+        if not body.get("has_more") or not body.get("next_page"):
+            break
+        url, params = body["next_page"], None
+    return cards
+
+
+def fetch_sets() -> list[dict]:
+    """Every Scryfall set (one /sets request)."""
+    resp = _get_with_backoff(f"{BASE_URL}/sets", headers=_HEADERS, timeout=30)
+    resp.raise_for_status()
+    return resp.json()["data"]
+
+
+SETS_PATH = _ROOT / "data" / "scryfall_sets.json"
+_SETS_MAX_AGE = 24 * 3600
+
+
+def load_sets(path: Path = SETS_PATH, fetch=None) -> list[dict]:
+    """Scryfall sets cached in `path`; downloaded when missing or older than 1 day."""
+    if not path.exists() or time.time() - path.stat().st_mtime > _SETS_MAX_AGE:
+        try:
+            sets = (fetch or fetch_sets)()
+        except Exception as e:  # noqa: BLE001 - offline, Scryfall down, ...
+            if not path.exists():
+                raise
+            print(f"[scryfall] could not refresh sets ({e}); using the cached file", file=sys.stderr)
+        else:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(json.dumps(sets, ensure_ascii=False), encoding="utf-8")
+            return sets
+    return json.loads(path.read_text(encoding="utf-8"))

@@ -1,3 +1,5 @@
+import os
+import time
 import tomllib
 from pathlib import Path
 from unittest.mock import Mock, patch
@@ -9,6 +11,9 @@ from lib.scryfall import (
     RateLimitedError,
     fetch_card,
     fetch_card_names,
+    fetch_sets,
+    load_sets,
+    search_cards,
 )
 from tests.conftest import load_scryfall
 
@@ -181,3 +186,85 @@ def test_requests_send_user_agent_with_version_and_accept_json(call):
         "(+https://github.com/dmadaffa/magic_wizard)"
     )
     assert headers["Accept"] == "application/json"
+
+
+def _page(cards, next_page=None):
+    body = {"object": "list", "data": cards, "has_more": next_page is not None}
+    if next_page:
+        body["next_page"] = next_page
+    return _ok(body)
+
+
+def test_search_pages_one_reads_only_first_page():
+    responses = [_page([_INSTANT_JSON], "https://x/p2"), _page([_INSTANT_JSON])]
+    with (
+        patch("lib.scryfall.requests.get", side_effect=responses) as mock_get,
+        patch("lib.scryfall.time.sleep"),
+    ):
+        result = search_cards("f:standard")
+    assert len(result) == 1 and mock_get.call_count == 1
+    assert mock_get.call_args.kwargs["params"] == {"q": "f:standard", "order": "edhrec"}
+    assert mock_get.call_args.kwargs["headers"]["Accept"] == "application/json"
+
+
+def test_search_pages_two_concatenates_and_trims():
+    second = {**_INSTANT_JSON, "name": "Second Card"}
+    responses = [_page([_INSTANT_JSON], "https://x/p2"), _page([second])]
+    with (
+        patch("lib.scryfall.requests.get", side_effect=responses) as mock_get,
+        patch("lib.scryfall.time.sleep"),
+    ):
+        result = search_cards("f:standard", pages=2)
+    assert [c["name"] for c in result] == ["Ember Sting", "Second Card"]
+    assert mock_get.call_args.args[0] == "https://x/p2"
+    assert all("prices" not in c for c in result)
+
+
+def test_search_no_match_gives_empty_list():
+    with patch("lib.scryfall.requests.get", return_value=_not_found()), patch("lib.scryfall.time.sleep"):
+        assert search_cards("f:standard xyzzy") == []
+
+
+def test_search_goes_through_429_backoff():
+    responses = [_rate_limited(), _page([_INSTANT_JSON])]
+    with (
+        patch("lib.scryfall.requests.get", side_effect=responses) as mock_get,
+        patch("lib.scryfall.time.sleep") as mock_sleep,
+    ):
+        assert len(search_cards("f:standard")) == 1
+    assert mock_get.call_count == 2 and _waits(mock_sleep) == [30.0]
+
+
+def test_fetch_sets_returns_data():
+    with patch("lib.scryfall.requests.get", return_value=_ok({"data": [{"code": "xaa"}]})), patch("lib.scryfall.time.sleep"):
+        assert fetch_sets() == [{"code": "xaa"}]
+
+
+def test_load_sets_refreshes_only_when_older_than_a_day(tmp_path):
+    path = tmp_path / "sets.json"
+    calls = []
+
+    def fetch():
+        calls.append(1)
+        return [{"code": "xaa"}]
+
+    assert load_sets(path, fetch) == [{"code": "xaa"}] and len(calls) == 1
+    load_sets(path, fetch)
+    assert len(calls) == 1
+    old = time.time() - 2 * 86400
+    os.utime(path, (old, old))
+    load_sets(path, fetch)
+    assert len(calls) == 2
+
+
+def test_load_sets_failed_download_uses_existing_file_and_warns(tmp_path, capsys):
+    path = tmp_path / "sets.json"
+    path.write_text('[{"code": "xaa"}]')
+    old = time.time() - 2 * 86400
+    os.utime(path, (old, old))
+
+    def fetch():
+        raise RuntimeError("offline")
+
+    assert load_sets(path, fetch) == [{"code": "xaa"}]
+    assert "offline" in capsys.readouterr().err

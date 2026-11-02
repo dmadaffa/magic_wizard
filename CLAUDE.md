@@ -93,7 +93,9 @@ Tags are `vX.Y.Z` and match `version` in `pyproject.toml`.
 agents/card_fetcher.py      script: Scryfall fetch + cache write
 agents/card_view.py         script: compact card lines for the analysis
 agents/deck_stats.py        script: curve, colors and mana sources of the main deck
+agents/rotation_report.py   script: deck cards rotating out of Standard (--prefix: survival search filter)
 lib/stats.py                deck statistics (pure functions over Cards)
+lib/rotation.py             Standard rotation: data/standard_rotation.json -> search filters, status
 lib/cache.py                CardCache class (JSON Lines)
 lib/card_model.py           Card/Face model, layout + keyword access rules
 lib/deck_parser.py          deck list parser
@@ -102,6 +104,8 @@ lib/ip_check.py             real-card-name detection (+ ip_allowlist.txt)
 scripts/check_ip.py         IP check CLI, run by .githooks/pre-commit
 docs/benchmarks.md          measured cost of features, with revisit thresholds
 data/card_cache.jsonl       persistent card data
+data/standard_rotation.json hand-edited next rotation date + rotating/evergreen set codes (tracked)
+data/scryfall_sets.json     /sets cache, refreshed after 1 day
 data/card_names.json        Scryfall name catalog for the IP check (30-day refresh)
 tests/fixtures/scryfall/    invented cards in Scryfall's JSON shape
 decks/                      your deck list files
