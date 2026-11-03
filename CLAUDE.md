@@ -21,6 +21,9 @@ python -m uv sync
 # strategies and a suggested list (also output/<deck>_<date>_suggested.txt)
 /analyze-deck decks/example_deck.txt Modern --save
 
+# Rotation-safe improvements from Scryfall searches, then a built deck (Standard)
+/improve-deck decks/example_deck.txt Standard
+
 # Build one 60-card Standard deck from a pool file (writes output/<pool>_<date>_built.txt)
 /build-deck decks/pool.txt Standard
 ```
@@ -49,6 +52,12 @@ The format is read from the header lines before the first card: a comment like `
 5. `.claude/commands/analyze-deck.md` — orchestrator skill: parse → fetch → view cards → deck stats → analyze
 
 The card fetcher, card view and deck stats are pure Python with zero LLM cost. Claude is only called once for the analysis step.
+
+## Improving and building decks (Standard)
+
+- `/improve-deck <deck> Standard` proposes 1 to 3 strategies, runs one `card-scout` sub-agent per proposal (`.claude/agents/card-scout.md`, Bash + Read/Write only, Sonnet), then builds a deck from the deck's cards plus the scouts' picks with `/build-deck`. `--card "<card>"` finds alternatives to one card instead, with no sub-agents. Card names come only from Scryfall searches (`agents/improve_deck.py`, which logs every result name per proposal; the skill drops returned names missing from the log).
+- `/build-deck <pool file> Standard` builds one 60-card deck from a pool of cards plus basic lands.
+- `data/standard_rotation.json` (tracked) holds `next_rotation`, the `rotating` set codes and the `evergreen` set codes. Edit it by hand when Wizards announces a rotation (about once a year): set the new date and the codes that leave. Surviving sets are derived from Scryfall's `/sets`. Cards are flagged only when the rotation is within 6 months; once the date has passed, `agents/rotation_report.py` warns that the file is out of date.
 
 ## Card Cache
 
@@ -96,6 +105,7 @@ Tags are `vX.Y.Z` and match `version` in `pyproject.toml`.
 agents/card_fetcher.py      script: Scryfall fetch + cache write
 agents/card_view.py         script: compact card lines for the analysis
 agents/deck_stats.py        script: curve, colors and mana sources of the main deck
+agents/improve_deck.py      script: Scryfall search with compact lines and a result-name log
 agents/rotation_report.py   script: deck cards rotating out of Standard (--prefix: survival search filter)
 lib/stats.py                deck statistics (pure functions over Cards)
 lib/rotation.py             Standard rotation: data/standard_rotation.json -> search filters, status
@@ -113,7 +123,8 @@ data/card_names.json        Scryfall name catalog for the IP check (30-day refre
 tests/fixtures/scryfall/    invented cards in Scryfall's JSON shape
 decks/                      your deck list files
 output/                     saved analyses and built decks, git-ignored
-.claude/commands/           Claude Code skills
+.claude/commands/           Claude Code skills (analyze-deck, build-deck, improve-deck)
+.claude/agents/             card-scout sub-agent
 .claude/loopwright.md       project-to-plugin contract: tasks dir, rules file, test/check commands, commit trailer
 .claude/settings.json       enables the loopwright plugin from its GitHub marketplace
 docs/agent-rules.md         project rules the subagents follow / check

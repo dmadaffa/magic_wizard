@@ -157,7 +157,7 @@ Write the same list (without the code fence) to `output/<deck file stem>_<YYYY-M
 3. In Limited, skip this legality check and put no card on `Unverified:` for legality. Otherwise run `card_view.py` (with `--format "<format>"` when the active format is known, as in Step 3) on those same names in one call and check each is legal in the active format. If it prints `<format>:unknown` (no legality data for that format), or the active format is unknown, don't guess: put the new cards on the `Unverified:` line with the reason `no legality data for <format>` (or `format unknown`). Replace any card that is illegal in a covered format.
 4. After any replacement, update the table, the deck list and the `_suggested.txt`, then repeat from check 1. Allow at most 2 correction rounds. If something still fails, write the files anyway and add a line `Unverified: <cards or counts at fault>` directly under the deck list's code block in the `.md`.
 
-Write the final `.md` only after the checks. Then end the chat with one line only: `Saved: output/<file>.md`.
+Write the final `.md` only after the checks. When the active format is Standard or unknown (`/improve-deck` supports only Standard), its last line, after everything else, is: `For rotation-safe suggestions sourced from Scryfall searches, run /improve-deck <deck file path> Standard.` (use the real path). For any other format, write no such line. Then end the chat with one line only: `Saved: output/<file>.md`.
 
 ## Tone and length
 - Be concise. No filler sentences.
