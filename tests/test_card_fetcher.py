@@ -31,6 +31,14 @@ def test_card_already_in_cache_skips_scryfall(tmp_path):
     mock_fetch.assert_not_called()
 
 
+def test_dirty_cli_name_is_a_cache_hit(tmp_path):
+    cache = CardCache(tmp_path / "cache.jsonl")
+    cache.put("Invented Card", _FAKE_CARD)
+    with patch("agents.card_fetcher.fetch_card") as mock_fetch:
+        main(["Invented Card\r"], cache=cache)
+    mock_fetch.assert_not_called()
+
+
 def test_returns_zero_exit_code_on_success(tmp_path):
     cache = CardCache(tmp_path / "cache.jsonl")
     with patch("agents.card_fetcher.fetch_card", return_value=_FAKE_CARD):

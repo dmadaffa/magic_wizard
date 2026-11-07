@@ -1,3 +1,4 @@
+import json
 import os
 from pathlib import Path
 from unittest.mock import patch
@@ -89,6 +90,50 @@ def test_put_fsyncs_flushed_temp_file_before_rename(tmp_path):
     assert [e[0] for e in events] == ["fsync", "replace"]
     assert events[0][1] > 0
     assert events[1][1] == "cache.jsonl.tmp"
+
+
+def test_put_normalizes_name(tmp_path):
+    cache = CardCache(tmp_path / "cache.jsonl")
+    cache.put("Invented Card\r", _INSTANT)
+    entry = cache.get("Invented Card")
+    assert entry is not None
+    assert entry["name"] == "Invented Card"
+
+
+def test_get_many_keys_are_the_callers_names(tmp_path):
+    cache = CardCache(tmp_path / "cache.jsonl")
+    cache.put("Invented Card", _INSTANT)
+    results = cache.get_many([" Invented  Card "])
+    assert list(results) == [" Invented  Card "]
+    assert results[" Invented  Card "] is not None
+
+
+def test_load_merges_dirty_keys_keeping_newest(tmp_path):
+    path = tmp_path / "cache.jsonl"
+    old = {"name": "Invented Card\r", "fetched_at": "2026-01-01T00:00:00+00:00",
+           "scryfall": {**_INSTANT, "type_line": "Sorcery"}}
+    new = {"name": "Invented Card", "fetched_at": "2026-02-01T00:00:00+00:00",
+           "scryfall": {**_INSTANT, "type_line": "Instant"}}
+    path.write_text("\n".join(json.dumps(e) for e in (new, old)) + "\n", encoding="utf-8")
+    cache = CardCache(path)
+    entry = cache.get("Invented Card")
+    assert entry["scryfall"]["type_line"] == "Instant"
+    assert entry["name"] == "Invented Card"
+
+    cache.put("Ember Sting", _INSTANT)
+    lines = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
+    assert [e["name"] for e in lines] == ["Invented Card", "Ember Sting"]
+
+
+def test_load_tie_on_fetched_at_keeps_later_line(tmp_path):
+    path = tmp_path / "cache.jsonl"
+    stamp = "2026-01-01T00:00:00+00:00"
+    first = {"name": "Invented Card", "fetched_at": stamp,
+             "scryfall": {**_INSTANT, "type_line": "Sorcery"}}
+    second = {"name": "Invented Card\r", "fetched_at": stamp,
+              "scryfall": {**_INSTANT, "type_line": "Instant"}}
+    path.write_text("\n".join(json.dumps(e) for e in (first, second)) + "\n", encoding="utf-8")
+    assert CardCache(path).get("Invented Card")["scryfall"]["type_line"] == "Instant"
 
 
 def test_multiple_cards_stored_independently(tmp_path):

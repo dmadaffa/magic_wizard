@@ -63,6 +63,8 @@ The card fetcher, card view and deck stats are pure Python with zero LLM cost. C
 
 Card data lives in `data/card_cache.jsonl`: one line per card with the Scryfall card object (images, prices and links stripped). Cards are fetched once and reused; the fetcher warns on stderr when a cached card is older than 3 months (legality changes with rotations and bans) but does not re-fetch it. Re-fetch named cards with `--refresh`; a failed refresh keeps the old entry and warns.
 
+Card names are whitespace-normalized as cache keys (ends trimmed, inner runs collapsed to one space, case kept); `CardCache` does this, so callers can pass names as they have them.
+
 Don't flatten Scryfall data when storing it. `lib/card_model.py` turns the stored object into a `Card` with `Face`s, so new mechanics are handled there without re-fetching.
 
 ## Multi-face cards and new mechanics
@@ -86,7 +88,7 @@ python -m uv run python agents/card_fetcher.py --refresh "Card Name 1" "Card Nam
 ## Upgrading to SQLite
 
 When the JSON Lines cache gets unwieldy:
-1. Create `lib/cache_sql.py` implementing the same `CardCache` interface (`get`, `put`, `get_many`)
+1. Create `lib/cache_sql.py` implementing the same `CardCache` interface (`get`, `put`, `get_many`), keying every entry by `lib.cache.normalize_name`
 2. In `agents/card_fetcher.py`, `agents/card_view.py` and `agents/deck_stats.py`, change `from lib.cache import CardCache` to `from lib.cache_sql import CardCache`
 
 No other changes needed.
