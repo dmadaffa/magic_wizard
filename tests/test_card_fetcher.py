@@ -239,23 +239,6 @@ def test_unmatched_whitespace_variants_get_one_retry_and_are_both_listed(tmp_pat
     assert "Not found  : 2" in out
 
 
-def test_rate_limit_in_a_later_batch_lists_every_card_not_yet_stored(tmp_path, capsys):
-    cache = CardCache(tmp_path / "cache.jsonl")
-    names = [f"Invented Card {i}" for i in range(76)]
-    outcomes = [_all_found(names[:75]), RateLimitedError("limited")]
-    with (
-        patch("agents.card_fetcher.fetch_cards", side_effect=outcomes),
-        patch("agents.card_fetcher.fetch_card") as single,
-    ):
-        code = main(names, cache=cache)
-    out = capsys.readouterr().out
-    single.assert_not_called()
-    assert code == 1
-    assert cache.get(names[0]) is not None and cache.get(names[75]) is None
-    assert "Not fetched (Scryfall rate limit), try again later: 1" in out
-    assert "- Invented Card 75" in out
-
-
 def test_failed_batch_request_falls_back_to_one_by_one(tmp_path):
     cache = CardCache(tmp_path / "cache.jsonl")
     with (
@@ -296,6 +279,8 @@ def test_rate_limit_lists_earlier_unmatched_names_too_and_never_retries(tmp_path
     out = capsys.readouterr().out
     single.assert_not_called()
     assert code == 1
+    assert cache.get(names[0]) is not None and cache.get(names[75]) is None
+    assert "Not fetched (Scryfall rate limit), try again later: 2" in out
     _, heading, listed = out.partition("Not fetched (Scryfall rate limit)")
     assert heading
     assert [line.strip() for line in listed.splitlines() if "- " in line] == [
