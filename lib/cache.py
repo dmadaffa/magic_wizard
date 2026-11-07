@@ -43,11 +43,14 @@ class CardCache:
             "scryfall": card,
         }
         # Write a temp file next to the cache, then swap it in, so a failed
-        # write never leaves the cache truncated.
+        # write never leaves the cache truncated. fsync the temp file first so a
+        # crash right after the rename can't leave it empty.
         tmp_path = self._path.with_name(self._path.name + ".tmp")
         try:
             with open(tmp_path, "w", encoding="utf-8", newline="\n") as f:
                 f.writelines(json.dumps(entry, ensure_ascii=False) + "\n" for entry in store.values())
+                f.flush()
+                os.fsync(f.fileno())
             os.replace(tmp_path, self._path)
         except BaseException:
             tmp_path.unlink(missing_ok=True)

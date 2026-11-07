@@ -1,3 +1,7 @@
+import os
+from pathlib import Path
+from unittest.mock import patch
+
 import pytest
 
 from lib.cache import CardCache
@@ -62,6 +66,29 @@ def test_failed_put_leaves_cache_untouched(tmp_path):
 
     assert path.read_bytes() == before
     assert [p.name for p in tmp_path.iterdir()] == ["cache.jsonl"]
+
+
+def test_put_fsyncs_flushed_temp_file_before_rename(tmp_path):
+    path = tmp_path / "cache.jsonl"
+    cache = CardCache(path)
+    events = []
+    real_fsync, real_replace = os.fsync, os.replace
+
+    def fake_fsync(fd):
+        # The data must already be flushed to the OS when fsync runs.
+        events.append(("fsync", os.fstat(fd).st_size))
+        real_fsync(fd)
+
+    def fake_replace(src, dst):
+        events.append(("replace", Path(src).name))
+        real_replace(src, dst)
+
+    with patch("lib.cache.os.fsync", fake_fsync), patch("lib.cache.os.replace", fake_replace):
+        cache.put("Ember Sting", _INSTANT)
+
+    assert [e[0] for e in events] == ["fsync", "replace"]
+    assert events[0][1] > 0
+    assert events[1][1] == "cache.jsonl.tmp"
 
 
 def test_multiple_cards_stored_independently(tmp_path):
