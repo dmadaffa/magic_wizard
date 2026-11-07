@@ -5,17 +5,17 @@
 
 An LLM-assisted deck analyzer for Magic: The Gathering. Give it a deck list; it returns concise, actionable feedback.
 
-It is a deterministic Python pipeline plus one Claude call:
+`/analyze-deck` is a deterministic Python pipeline plus one Claude call:
 
 1. `lib/deck_parser.py` parses an MTGO/Arena deck list (main deck, sideboard, commander, format).
 2. `agents/card_fetcher.py` fetches cards missing from the local cache from the [Scryfall](https://scryfall.com) API and stores them in `data/card_cache.jsonl`.
 3. `agents/card_view.py` prints a compact line per card (and per face) from the cache.
 4. `agents/deck_stats.py` computes the mana curve, color pips and mana sources of the main deck.
-5. The `/analyze-deck` skill ([Claude Code](https://claude.com/claude-code)) runs those steps and asks Claude to analyze the deck. This is the only LLM step; steps 1-4 make no LLM calls.
+5. The `/analyze-deck` skill ([Claude Code](https://claude.com/claude-code)) runs those steps and asks Claude to analyze the deck. This is the only LLM step of `/analyze-deck`; steps 1-4 make no LLM calls.
 
 ## Quick start
 
-Requires Python 3.12+, [uv](https://docs.astral.sh/uv/) and Claude Code.
+Requires Python 3.12+, [uv](https://docs.astral.sh/uv/) and Claude Code. The skills call `uv run ...` directly, so the `uv` command must be on your PATH.
 
 ```bash
 python -m uv sync
@@ -41,6 +41,17 @@ Then, in Claude Code:
 `--save` also writes the analysis to `output/<deck>_<date>.md`. The file also holds replacements, alternative strategies and a suggested deck list, which is also written to `output/<deck>_<date>_suggested.txt`.
 
 The format comes from a header line in the file, or from the second argument (which wins). See `CLAUDE.md` for the full deck format and the card cache details.
+
+## Improving and building Standard decks
+
+```
+/improve-deck decks/my_deck.txt Standard
+/build-deck decks/pool.txt Standard
+```
+
+- `/improve-deck` finds rotation-safe improvements from Scryfall searches: it proposes 1 to 3 strategies, runs one `card-scout` sub-agent per proposal, then builds a deck from your cards plus the scouts' picks.
+- `/build-deck` builds one 60-card deck from a pool file plus basic lands and writes it to `output/<pool>_<date>_built.txt`.
+- `data/standard_rotation.json` is edited by hand when a rotation is announced; see `CLAUDE.md`.
 
 ## Card content is not in this repo
 

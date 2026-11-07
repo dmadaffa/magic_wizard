@@ -6,7 +6,7 @@
 
 > **Agent workflow:** for a bug or small feature, spawn the `loopwright:developer` subagent (Sonnet) with the task definition, then the `loopwright:code-reviewer` subagent with the same task definition and not the developer's reasoning. Commit only after the review passes. The agents come from the `loopwright` plugin (https://github.com/dmadaffa/loopwright, installed via `.claude/settings.json`). Generic rules for both live in the plugin's `rules.md`; project rules live in `docs/agent-rules.md` (add new project rules there); `.claude/loopwright.md` tells the agents where those are and which test and check commands to run.
 
-LLM-assisted analyzer for Magic: The Gathering decks: a deterministic Python pipeline (parse the deck list, fetch and cache cards from Scryfall, print a compact card view) plus one Claude analysis step. Uses Scryfall as the card data source and a local JSON Lines cache to avoid redundant API calls.
+LLM-assisted analyzer for Magic: The Gathering decks: a deterministic Python pipeline (parse the deck list, fetch and cache cards from Scryfall, print a compact card view) plus one Claude analysis step (`/analyze-deck`; `/improve-deck` in deck mode runs 1 to 3 sub-agents plus a build step). Uses Scryfall as the card data source and a local JSON Lines cache to avoid redundant API calls.
 
 ## Quick Start
 
@@ -14,15 +14,15 @@ LLM-assisted analyzer for Magic: The Gathering decks: a deterministic Python pip
 # Install dependencies (first time only)
 python -m uv sync
 
-# Analyze a deck
-/analyze-deck decks/example_deck.txt
+# Analyze a deck (create decks/my_deck.txt first, see "Adding a Deck"; decks/ is git-ignored)
+/analyze-deck decks/my_deck.txt
 
 # Also write the analysis to output/<deck>_<date>.md, plus replacements, alternative
 # strategies and a suggested list (also output/<deck>_<date>_suggested.txt)
-/analyze-deck decks/example_deck.txt Modern --save
+/analyze-deck decks/my_deck.txt Modern --save
 
 # Rotation-safe improvements from Scryfall searches, then a built deck (Standard)
-/improve-deck decks/example_deck.txt Standard
+/improve-deck decks/my_deck.txt Standard
 
 # Build one 60-card Standard deck from a pool file (writes output/<pool>_<date>_built.txt)
 /build-deck decks/pool.txt Standard
@@ -117,11 +117,14 @@ lib/deck_parser.py          deck list parser
 lib/scryfall.py             Scryfall API client
 lib/ip_check.py             real-card-name detection (+ ip_allowlist.txt)
 scripts/check_ip.py         IP check CLI, run by .githooks/pre-commit
+.githooks/pre-commit        pre-commit hook: IP check on staged files + ruff on staged .py files
+.github/workflows/ci.yml    CI: tests, ruff and the IP check on the tree
 docs/benchmarks.md          measured cost of features, with revisit thresholds
 data/card_cache.jsonl       persistent card data
 data/standard_rotation.json hand-edited next rotation date + rotating/evergreen set codes (tracked)
 data/scryfall_sets.json     /sets cache, refreshed after 1 day
 data/card_names.json        Scryfall name catalog for the IP check (30-day refresh)
+tests/                      pytest suite
 tests/fixtures/scryfall/    invented cards in Scryfall's JSON shape
 decks/                      your deck list files
 output/                     saved analyses and built decks, git-ignored
