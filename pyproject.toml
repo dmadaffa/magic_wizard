@@ -1,6 +1,6 @@
 [project]
 name = "magic-wizard"
-version = "0.1.0"
+version = "0.2.0"
 description = "LLM-assisted Magic: The Gathering deck analyzer with a cached Scryfall card store."
 requires-python = ">=3.12"
 dependencies = [
