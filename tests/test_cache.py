@@ -142,3 +142,37 @@ def test_multiple_cards_stored_independently(tmp_path):
     cache.put("Tidewatch Apprentice", _DFC)
     assert cache.get("Ember Sting")["scryfall"]["mana_cost"] == "{R}"
     assert cache.get("Tidewatch Apprentice")["scryfall"]["layout"] == "transform"
+
+
+def test_put_many_stores_every_entry_with_one_rewrite_and_keeps_others(tmp_path):
+    path = tmp_path / "cache.jsonl"
+    cache = CardCache(path)
+    cache.put("Old Card", _INSTANT)
+    with patch("lib.cache.os.replace", wraps=os.replace) as replace:
+        cache.put_many({"Ember Sting": _INSTANT, "Tidewatch Apprentice": _DFC})
+    assert replace.call_count == 1
+    assert cache.get("Old Card") is not None
+    entry = cache.get("Tidewatch Apprentice")
+    assert entry["scryfall"] == _DFC and entry["fetched_at"]
+    assert set(entry) == {"name", "fetched_at", "scryfall"}
+    assert len(path.read_text(encoding="utf-8").splitlines()) == 3
+
+
+def test_put_many_normalizes_names_and_replaces_existing(tmp_path):
+    path = tmp_path / "cache.jsonl"
+    cache = CardCache(path)
+    cache.put("Ember Sting", {"name": "old"})
+    cache.put_many({"Ember Sting ": _INSTANT})
+    assert cache.get("Ember Sting")["scryfall"] == _INSTANT
+    assert len(path.read_text(encoding="utf-8").splitlines()) == 1
+
+
+def test_put_many_fsyncs_the_temp_file_before_the_rename(tmp_path):
+    cache = CardCache(tmp_path / "cache.jsonl")
+    order = []
+    with (
+        patch("lib.cache.os.fsync", side_effect=lambda fd: order.append("fsync")),
+        patch("lib.cache.os.replace", side_effect=lambda *a: order.append("replace")),
+    ):
+        cache.put_many({"Ember Sting": _INSTANT})
+    assert order == ["fsync", "replace"]

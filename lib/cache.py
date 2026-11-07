@@ -54,13 +54,18 @@ class CardCache:
         return {name: store.get(normalize_name(name)) for name in names}
 
     def put(self, name: str, card: dict) -> None:
-        name = normalize_name(name)
+        self.put_many({name: card})
+
+    def put_many(self, cards: dict[str, dict]) -> None:
+        """Store several cards with one load and one file rewrite."""
         store = self._load()
-        store[name] = {
-            "name": name,
-            "fetched_at": datetime.now(UTC).isoformat(),
-            "scryfall": card,
-        }
+        fetched_at = datetime.now(UTC).isoformat()
+        for name, card in cards.items():
+            name = normalize_name(name)
+            store[name] = {"name": name, "fetched_at": fetched_at, "scryfall": card}
+        self._write(store)
+
+    def _write(self, store: dict[str, dict]) -> None:
         # Write a temp file next to the cache, then swap it in, so a failed
         # write never leaves the cache truncated. fsync the temp file first so a
         # crash right after the rename can't leave it empty.

@@ -11,6 +11,7 @@ from lib.scryfall import (
     RateLimitedError,
     fetch_card,
     fetch_card_names,
+    fetch_cards,
     fetch_sets,
     load_sets,
     search_cards,
@@ -268,3 +269,97 @@ def test_load_sets_failed_download_uses_existing_file_and_warns(tmp_path, capsys
 
     assert load_sets(path, fetch) == [{"code": "xaa"}]
     assert "offline" in capsys.readouterr().err
+
+
+def _collection(cards, not_found=()):
+    return _ok({
+        "object": "list",
+        "not_found": [{"name": n} for n in not_found],
+        "data": cards,
+    })
+
+
+def test_fetch_cards_posts_identifiers_in_one_request():
+    with (
+        patch("lib.scryfall.requests.post", return_value=_collection([_INSTANT_JSON])) as mock_post,
+        patch("lib.scryfall.time.sleep"),
+    ):
+        result = fetch_cards(["Ember Sting"])
+    assert mock_post.call_count == 1
+    assert mock_post.call_args.args[0].endswith("/cards/collection")
+    assert mock_post.call_args.kwargs["json"] == {"identifiers": [{"name": "Ember Sting"}]}
+    assert mock_post.call_args.kwargs["headers"]["Accept"] == "application/json"
+    assert mock_post.call_args.kwargs["headers"]["User-Agent"].startswith("magic-wizard/")
+    assert result["Ember Sting"]["mana_cost"] == "{R}"
+
+
+def test_fetch_cards_trims_the_cards():
+    with (
+        patch("lib.scryfall.requests.post", return_value=_collection([_INSTANT_JSON])),
+        patch("lib.scryfall.time.sleep"),
+    ):
+        result = fetch_cards(["Ember Sting"])
+    assert "prices" not in result["Ember Sting"]
+
+
+@pytest.mark.parametrize(
+    ("requested", "card"),
+    [
+        ("ember sting", _INSTANT_JSON),
+        ("Tidewatch Horror", load_scryfall("transform")),
+        ("TIDEWATCH APPRENTICE", load_scryfall("transform")),
+    ],
+    ids=["case-differs", "back-face-name", "front-face-name-upper"],
+)
+def test_fetch_cards_matches_by_name_or_face_name_ignoring_case(requested, card):
+    # The position of a card in data is not used: an unrelated card comes first.
+    other = {**_INSTANT_JSON, "name": "Unrelated Card"}
+    with (
+        patch("lib.scryfall.requests.post", return_value=_collection([other, card])),
+        patch("lib.scryfall.time.sleep"),
+    ):
+        result = fetch_cards([requested])
+    assert result[requested]["name"] == card["name"]
+
+
+def test_fetch_cards_leaves_unmatched_names_out_of_the_result():
+    with (
+        patch("lib.scryfall.requests.post", return_value=_collection([_INSTANT_JSON], not_found=["Fake Card"])),
+        patch("lib.scryfall.time.sleep"),
+    ):
+        result = fetch_cards(["Ember Sting", "Fake Card"])
+    assert list(result) == ["Ember Sting"]
+
+
+def test_fetch_cards_full_name_match_beats_a_face_name_match_in_any_data_order():
+    # The first card's back face is named like the second card's full name.
+    dfc = load_scryfall("transform")
+    clash = {**_INSTANT_JSON, "name": dfc["card_faces"][1]["name"]}
+    with (
+        patch("lib.scryfall.requests.post", return_value=_collection([dfc, clash])),
+        patch("lib.scryfall.time.sleep"),
+    ):
+        result = fetch_cards([clash["name"]])
+    assert result[clash["name"]]["name"] == clash["name"]
+    assert "card_faces" not in result[clash["name"]]
+
+
+def test_fetch_cards_retries_once_after_a_429():
+    responses = [_rate_limited(), _collection([_INSTANT_JSON])]
+    with (
+        patch("lib.scryfall.requests.post", side_effect=responses) as mock_post,
+        patch("lib.scryfall.time.sleep") as mock_sleep,
+    ):
+        fetch_cards(["Ember Sting"])
+    assert mock_post.call_count == 2
+    assert [c.args[0] for c in mock_sleep.call_args_list] == [0.55, 30, 0.55]
+
+
+def test_fetch_cards_second_429_raises():
+    with (
+        patch("lib.scryfall.requests.post", side_effect=[_rate_limited(), _rate_limited()]) as mock_post,
+        patch("lib.scryfall.time.sleep"),
+        pytest.raises(RateLimitedError),
+    ):
+        fetch_cards(["Ember Sting"])
+    assert mock_post.call_count == 2

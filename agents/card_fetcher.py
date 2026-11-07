@@ -4,13 +4,16 @@ Usage:
     uv run python agents/card_fetcher.py [--refresh] "Cinder Dart" "Island" "Null Ripple"
 
 Checks the local JSON Lines cache first; only calls Scryfall for cards not yet stored.
+Those are fetched in batches of 75 (/cards/collection), each batch written to the cache
+at once; names the batch does not return are retried one by one (/cards/named).
+Names that differ only in whitespace are requested once.
 Cached cards older than 3 months (legality changes with rotations and bans) are
 listed on stderr with their fetched_at date but not re-fetched. --refresh
 re-fetches every named card; if that fails for a cached card, the old entry is
 kept with a warning and it does not count as an error.
 Prints a summary of hits and fetches. Exit code 0 on success, 1 if any card
 could not be found. If Scryfall still answers 429 after a wait, the fetch stops and
-the card that hit the limit plus every card not yet tried are listed as not fetched
+every card not yet fetched is listed as not fetched
 (rate limit), separately from "Not found"; exit code 1.
 """
 
@@ -21,8 +24,14 @@ from pathlib import Path
 # Allow running as a script from the project root
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from lib.cache import CardCache
-from lib.scryfall import CardNotFoundError, RateLimitedError, fetch_card
+from lib.cache import CardCache, normalize_name
+from lib.scryfall import (
+    COLLECTION_BATCH_SIZE,
+    CardNotFoundError,
+    RateLimitedError,
+    fetch_card,
+    fetch_cards,
+)
 
 STALE_AFTER = timedelta(days=90)  # "3 months"
 
@@ -74,25 +83,67 @@ def main(names: list[str], cache: CardCache | None = None, refresh: bool = False
         kept_stale.append(name)
         return True
 
-    for i, name in enumerate(to_fetch):
-        try:
-            data = fetch_card(name)
-            cache.put(name, data)
-            fetched.append(name)
-        except CardNotFoundError:
-            if not keep_stale(name, "not found"):
+    # One request per normalized name; the outcome applies to every caller name in the group.
+    groups: dict[str, list[str]] = {}
+    for name in to_fetch:
+        groups.setdefault(normalize_name(name), []).append(name)
+    reps = list(groups)  # the normalized names are what Scryfall is asked for
+
+    def members(rep: str) -> list[str]:
+        return groups[rep]
+
+    def fail(rep: str, reason: str) -> None:
+        """A failed fetch or store: keep the old entry if there is one, else it is an error."""
+        for name in members(rep):
+            if not keep_stale(name, reason):
                 errors.append(name)
+
+    unmatched: list[str] = []  # reps the batch request did not return: retried one by one
+    limited: list[str] = []  # reps not fetched because Scryfall rate-limited us
+
+    for start in range(0, len(reps), COLLECTION_BATCH_SIZE):
+        batch = reps[start:start + COLLECTION_BATCH_SIZE]
+        try:
+            found = fetch_cards(batch)
+        except RateLimitedError as exc:
+            print(f"  ERROR fetching a batch of {len(batch)} cards: {exc}", file=sys.stderr)
+            limited = unmatched + reps[start:]
+            unmatched = []
+            break
+        except Exception as exc:  # noqa: BLE001 - fall back to one request per card
+            print(f"  ERROR fetching a batch of {len(batch)} cards: {exc}", file=sys.stderr)
+            found = {}
+        if found:
+            try:
+                cache.put_many(found)
+            except Exception as exc:  # noqa: BLE001 - e.g. the cache file is locked
+                print(f"  ERROR storing a batch of {len(found)} cards: {exc}", file=sys.stderr)
+                for rep in found:
+                    fail(rep, str(exc))
+            else:
+                for rep in found:
+                    fetched.extend(members(rep))
+        unmatched.extend(rep for rep in batch if rep not in found)
+
+    for i, rep in enumerate(unmatched):
+        try:
+            cache.put(rep, fetch_card(rep))
+            fetched.extend(members(rep))
+        except CardNotFoundError:
+            fail(rep, "not found")
         except RateLimitedError as exc:
             # Scryfall is already limiting us: stop, don't wait 30s per remaining card.
-            print(f"  ERROR fetching {name!r}: {exc}", file=sys.stderr)
-            for rest in to_fetch[i:]:
-                if not keep_stale(rest, "Scryfall rate limit"):
-                    rate_limited.append(rest)
+            print(f"  ERROR fetching {rep!r}: {exc}", file=sys.stderr)
+            limited = unmatched[i:]
             break
         except Exception as exc:  # noqa: BLE001 - one bad card must not abort the batch
-            print(f"  ERROR fetching {name!r}: {exc}", file=sys.stderr)
-            if not keep_stale(name, str(exc)):
-                errors.append(name)
+            print(f"  ERROR fetching {rep!r}: {exc}", file=sys.stderr)
+            fail(rep, str(exc))
+
+    for rep in limited:
+        for name in members(rep):
+            if not keep_stale(name, "Scryfall rate limit"):
+                rate_limited.append(name)
 
     stale = [n for n in cached if n not in to_fetch and _is_stale(results[n])]
     if stale:

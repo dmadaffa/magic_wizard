@@ -1,3 +1,4 @@
+import os
 from datetime import UTC, datetime, timedelta
 from unittest.mock import patch
 
@@ -14,6 +15,18 @@ _FAKE_CARD = {
     "cmc": "1.0",
     "type_line": "Instant",
 }
+
+
+@pytest.fixture(autouse=True)
+def _no_batch_by_default():
+    """Scryfall boundary: by default the batch request matches nothing, so the
+    per-card tests below exercise the one-by-one path. Batch tests patch it again."""
+    with patch("agents.card_fetcher.fetch_cards", return_value={}) as batch:
+        yield batch
+
+
+def _all_found(names):
+    return {n: {**_FAKE_CARD, "name": n} for n in names}
 
 
 def test_fetched_card_is_stored_in_cache(tmp_path):
@@ -166,3 +179,164 @@ def test_failed_refresh_keeps_stale_entry_and_warns(tmp_path, capsys, failure):
     assert "Old Card" in captured.err and "2020-01-15" in captured.err
     assert "Not found" not in captured.out and "rate limit" not in captured.out
     assert "older than 3 months" not in captured.err
+
+
+def test_cards_are_fetched_in_batches_of_75_with_one_cache_write_each(tmp_path):
+    cache = CardCache(tmp_path / "cache.jsonl")
+    names = [f"Invented Card {i}" for i in range(76)]
+    with (
+        patch("agents.card_fetcher.fetch_cards", side_effect=_all_found) as batch,
+        patch("agents.card_fetcher.fetch_card") as single,
+        patch("lib.cache.os.replace", wraps=os.replace) as replace,
+    ):
+        code = main(names, cache=cache)
+    assert [len(c.args[0]) for c in batch.call_args_list] == [75, 1]
+    single.assert_not_called()
+    assert replace.call_count == 2
+    assert code == 0
+    assert all(cache.get(n) is not None for n in names)
+
+
+def test_unmatched_names_are_retried_one_by_one(tmp_path, capsys):
+    cache = CardCache(tmp_path / "cache.jsonl")
+    outcomes = {"Card B": _FAKE_CARD}
+
+    def single(name):
+        if name in outcomes:
+            return outcomes[name]
+        raise CardNotFoundError(name)
+
+    with (
+        patch("agents.card_fetcher.fetch_cards", side_effect=lambda ns: _all_found(["Card A"])),
+        patch("agents.card_fetcher.fetch_card", side_effect=single) as mock_single,
+    ):
+        code = main(["Card A", "Card B", "Card C"], cache=cache)
+    out = capsys.readouterr().out
+    assert [c.args[0] for c in mock_single.call_args_list] == ["Card B", "Card C"]
+    assert code == 1
+    assert cache.get("Card B") is not None and cache.get("Card C") is None
+    assert "Fetched    : 2" in out
+    assert "- Card C" in out.partition("Not found")[2]
+
+
+def test_names_differing_only_in_whitespace_are_requested_once(tmp_path, capsys):
+    path = tmp_path / "cache.jsonl"
+    cache = CardCache(path)
+    with patch("agents.card_fetcher.fetch_cards", side_effect=lambda ns: _all_found(ns)) as batch:
+        code = main(["Invented Card", "Invented Card "], cache=cache)
+    assert batch.call_count == 1 and len(batch.call_args.args[0]) == 1
+    assert len(path.read_text(encoding="utf-8").splitlines()) == 1
+    assert code == 0
+    assert "Fetched    : 2" in capsys.readouterr().out
+
+
+def test_unmatched_whitespace_variants_get_one_retry_and_are_both_listed(tmp_path, capsys):
+    cache = CardCache(tmp_path / "cache.jsonl")
+    with patch("agents.card_fetcher.fetch_card", side_effect=CardNotFoundError("x")) as single:
+        code = main(["Fake Card", "Fake Card "], cache=cache)
+    out = capsys.readouterr().out
+    assert single.call_count == 1 and code == 1
+    assert "Not found  : 2" in out
+
+
+def test_rate_limit_in_a_later_batch_lists_every_card_not_yet_stored(tmp_path, capsys):
+    cache = CardCache(tmp_path / "cache.jsonl")
+    names = [f"Invented Card {i}" for i in range(76)]
+    outcomes = [_all_found(names[:75]), RateLimitedError("limited")]
+    with (
+        patch("agents.card_fetcher.fetch_cards", side_effect=outcomes),
+        patch("agents.card_fetcher.fetch_card") as single,
+    ):
+        code = main(names, cache=cache)
+    out = capsys.readouterr().out
+    single.assert_not_called()
+    assert code == 1
+    assert cache.get(names[0]) is not None and cache.get(names[75]) is None
+    assert "Not fetched (Scryfall rate limit), try again later: 1" in out
+    assert "- Invented Card 75" in out
+
+
+def test_failed_batch_request_falls_back_to_one_by_one(tmp_path):
+    cache = CardCache(tmp_path / "cache.jsonl")
+    with (
+        patch("agents.card_fetcher.fetch_cards", side_effect=requests.HTTPError("500")),
+        patch("agents.card_fetcher.fetch_card", return_value=_FAKE_CARD) as single,
+    ):
+        code = main(["Card A", "Card B"], cache=cache)
+    assert single.call_count == 2 and code == 0
+    assert cache.get("Card A") is not None
+
+
+def test_refresh_batch_replaces_stale_entry_and_keeps_unmatched_one(tmp_path, capsys):
+    cache = CardCache(tmp_path / "cache.jsonl")
+    _put_aged(cache, "Card A", "2020-01-15T00:00:00+00:00")
+    _put_aged(cache, "Card B", "2020-01-15T00:00:00+00:00")
+    new = {**_FAKE_CARD, "type_line": "Sorcery"}
+    with (
+        patch("agents.card_fetcher.fetch_cards", return_value={"Card A": new}),
+        patch("agents.card_fetcher.fetch_card", side_effect=CardNotFoundError("x")),
+    ):
+        code = main(["Card A", "Card B"], cache=cache, refresh=True)
+    out = capsys.readouterr().out
+    assert code == 0
+    assert cache.get("Card A")["scryfall"]["type_line"] == "Sorcery"
+    assert cache.get("Card B")["fetched_at"] == "2020-01-15T00:00:00+00:00"
+    assert "Fetched    : 1" in out and "Kept stale : 1" in out
+
+
+def test_rate_limit_lists_earlier_unmatched_names_too_and_never_retries(tmp_path, capsys):
+    cache = CardCache(tmp_path / "cache.jsonl")
+    names = [f"Invented Card {i}" for i in range(76)]
+    outcomes = [_all_found(names[:74]), RateLimitedError("limited")]
+    with (
+        patch("agents.card_fetcher.fetch_cards", side_effect=outcomes),
+        patch("agents.card_fetcher.fetch_card") as single,
+    ):
+        code = main(names, cache=cache)
+    out = capsys.readouterr().out
+    single.assert_not_called()
+    assert code == 1
+    _, heading, listed = out.partition("Not fetched (Scryfall rate limit)")
+    assert heading
+    assert [line.strip() for line in listed.splitlines() if "- " in line] == [
+        "- Invented Card 74",
+        "- Invented Card 75",
+    ]
+
+
+def test_dirty_names_are_requested_by_their_normalized_name(tmp_path):
+    cache = CardCache(tmp_path / "cache.jsonl")
+    with (
+        patch("agents.card_fetcher.fetch_cards", side_effect=_all_found) as batch,
+        patch("agents.card_fetcher.fetch_card") as single,
+    ):
+        main(["Invented Card ", "Other  Card\r"], cache=cache)
+    assert batch.call_args.args[0] == ["Invented Card", "Other Card"]
+    single.assert_not_called()
+    assert cache.get("Other Card") is not None
+
+
+def test_unmatched_dirty_name_is_retried_by_its_normalized_name(tmp_path):
+    cache = CardCache(tmp_path / "cache.jsonl")
+    with patch("agents.card_fetcher.fetch_card", return_value=_FAKE_CARD) as single:
+        main(["Invented Card "], cache=cache)
+    single.assert_called_once_with("Invented Card")
+
+
+@pytest.mark.parametrize("refresh", [False, True], ids=["new-card", "refresh-keeps-stale"])
+def test_cache_write_error_is_reported_not_a_crash(tmp_path, capsys, refresh):
+    cache = CardCache(tmp_path / "cache.jsonl")
+    if refresh:
+        _put_aged(cache, "Card A", "2020-01-15T00:00:00+00:00")
+    with (
+        patch("agents.card_fetcher.fetch_cards", side_effect=_all_found),
+        patch("lib.cache.os.replace", side_effect=PermissionError("locked")),
+    ):
+        code = main(["Card A", "Card A "], cache=cache, refresh=refresh)
+    captured = capsys.readouterr()
+    assert "locked" in captured.err
+    assert "Fetched    : 0" in captured.out
+    if refresh:
+        assert code == 0 and "Kept stale : 2" in captured.out
+    else:
+        assert code == 1 and "Not found  : 2" in captured.out

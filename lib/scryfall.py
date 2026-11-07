@@ -1,4 +1,8 @@
-"""Thin Scryfall API client — returns card objects trimmed of images, prices and links."""
+"""Thin Scryfall API client — returns card objects trimmed of images, prices and links.
+
+Cards are fetched in batches with fetch_cards (/cards/collection) or one by one with
+fetch_card (/cards/named); every request is spaced out and backs off on a 429.
+"""
 
 import json
 import sys
@@ -38,6 +42,9 @@ _DROP_KEYS = frozenset({
     "variation", "preview",
 })
 
+# /cards/collection accepts at most 75 identifiers per request.
+COLLECTION_BATCH_SIZE = 75
+
 # Scryfall limits access for 30s after a 429; waiting less just draws another one.
 _RATE_LIMIT_WAIT = 30.0
 
@@ -57,13 +64,14 @@ def _retry_after(resp: requests.Response) -> float:
         return 0.0
 
 
-def _get_with_backoff(url: str, **kwargs) -> requests.Response:
-    """GET; on a 429 tell the user, wait max(30s, Retry-After), retry once.
+def _send_with_backoff(send, url: str, **kwargs) -> requests.Response:
+    """Send with `send` (requests.get or requests.post), spaced out; on a 429 tell the
+    user, wait max(30s, Retry-After), retry once.
 
     A second 429 raises RateLimitedError: Scryfall bans clients that keep going.
     """
     time.sleep(_RATE_LIMIT_SLEEP)
-    resp = requests.get(url, **kwargs)
+    resp = send(url, **kwargs)
     if resp.status_code != 429:
         return resp
     wait = max(_RATE_LIMIT_WAIT, _retry_after(resp))
@@ -74,13 +82,21 @@ def _get_with_backoff(url: str, **kwargs) -> requests.Response:
     )
     time.sleep(wait)
     time.sleep(_RATE_LIMIT_SLEEP)
-    resp = requests.get(url, **kwargs)
+    resp = send(url, **kwargs)
     if resp.status_code == 429:
         raise RateLimitedError(
             "Scryfall is still rate-limiting requests (HTTP 429) after a "
             f"{wait:.0f}s wait; try again later"
         )
     return resp
+
+
+def _get_with_backoff(url: str, **kwargs) -> requests.Response:
+    return _send_with_backoff(requests.get, url, **kwargs)
+
+
+def _post_with_backoff(url: str, **kwargs) -> requests.Response:
+    return _send_with_backoff(requests.post, url, **kwargs)
 
 
 def fetch_card(name: str) -> dict:
@@ -97,6 +113,31 @@ def fetch_card(name: str) -> dict:
     resp.raise_for_status()
 
     return trim_card(resp.json())
+
+
+def fetch_cards(names: list[str]) -> dict[str, dict]:
+    """Fetch up to COLLECTION_BATCH_SIZE cards by name in one /cards/collection request.
+
+    Returns requested name -> trimmed card. A card matches a name if the name equals,
+    case-insensitively, its `name` or one of its face names (order of `data` and
+    `not_found` are not used). Names with no match are left out: the caller decides
+    what to do with them. Raises RateLimitedError after a second 429.
+    """
+    resp = _post_with_backoff(
+        f"{BASE_URL}/cards/collection",
+        json={"identifiers": [{"name": n} for n in names]},
+        headers=_HEADERS,
+        timeout=30,
+    )
+    resp.raise_for_status()
+    by_name: dict[str, dict] = {}
+    cards = resp.json()["data"]
+    for card in cards:
+        by_name.setdefault(card["name"].casefold(), card)
+    for card in cards:  # a face name only counts where no card has that full name
+        for face in card.get("card_faces", []):
+            by_name.setdefault(face["name"].casefold(), card)
+    return {n: trim_card(by_name[n.casefold()]) for n in names if n.casefold() in by_name}
 
 
 def fetch_card_names() -> list[str]:
